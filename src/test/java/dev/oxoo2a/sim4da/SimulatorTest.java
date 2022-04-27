@@ -1,4 +1,4 @@
-package dev.oxoo2a.sim4datest;
+package dev.oxoo2a.sim4da;
 
 import org.junit.jupiter.api.Test;
 //import dev.oxoo2a.sim4da.Simulator;

@@ -1,4 +1,4 @@
-package dev.oxoo2a.sim4datest;
+package dev.oxoo2a.sim4da;
 
 //import static org.junit.jupiter.api.Assertions.assertEquals;
 
