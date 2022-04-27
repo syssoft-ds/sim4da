@@ -1,6 +1,6 @@
-package dev.oxoo2a.sim4da.test;
+package dev.oxoo2a.sim4da;
 
-//import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;
 //import dev.oxoo2a.sim4da.Simulator;
 //import dev.oxoo2a.sim4da.Node;
 

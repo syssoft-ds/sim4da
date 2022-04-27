@@ -1,4 +1,4 @@
-package dev.oxoo2a.sim4da.test;
+package dev.oxoo2a.sim4da;
 
 import java.util.Random;
 
