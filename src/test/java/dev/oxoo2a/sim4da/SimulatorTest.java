@@ -1,10 +1,9 @@
 package dev.oxoo2a.sim4da;
 
-//import dev.oxoo2a.sim4da.Simulator;
-//import dev.oxoo2a.sim4da.Node;
-
+import org.junit.jupiter.api.Test;
 public class SimulatorTest {
 
+    @Test
     public static void simpleSimulation() {
         int n_nodes = 5;
         int duration = 5;
