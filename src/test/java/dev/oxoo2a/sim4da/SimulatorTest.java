@@ -6,7 +6,7 @@ public class SimulatorTest {
     @Test
     public static void simpleSimulation() {
         int n_nodes = 5;
-        int duration = 5;
+        int duration = 20;
 
         Simulator s = new Simulator(n_nodes);
         for (int id=0; id<n_nodes; id++) {
