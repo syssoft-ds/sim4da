@@ -1,12 +1,13 @@
 package dev.oxoo2a.sim4da;
 
-//import dev.oxoo2a.sim4da.Simulator;
-//import dev.oxoo2a.sim4da.Node;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 public class SimulatorTest {
 
-    public static void simpleSimulation() {
-        int n_nodes = 5;
+    @Test
+    public void simpleSimulation() {
+        int n_nodes = 3;
         int duration = 5;
 
         Simulator s = new Simulator(n_nodes);
@@ -17,6 +18,8 @@ public class SimulatorTest {
         try {
             s.runSimulation(duration);
         }
-        catch (InstantiationException ignored) {}
+        catch (InstantiationException ignored) {
+            fail("Not all nodes instantiated");
+        }
     }
 }
