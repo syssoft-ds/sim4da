@@ -1,3 +1,9 @@
 *.class
+
 target/
+build/
+
 .vscode/
+.idea/
+.gradle/
+
