@@ -1,6 +1,8 @@
 package dev.oxoo2a.sim4da;
 
 import java.util.HashMap;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import dev.oxoo2a.sim4da.Network;
 
@@ -26,6 +28,7 @@ public class Simulator {
             if (n == null) throw new InstantiationException();
             n.setNetwork(network);
         }
+        logger.info("Simulator::runSimulation with "+n_nodes+" nodes for "+duration+" seconds");
         nodes.values().forEach(Node::start);
         // Wait for the required duration
         try {
@@ -43,4 +46,6 @@ public class Simulator {
     private final int n_nodes;
     private final Network network;
     private final HashMap<Integer, Node> nodes;
+
+    Logger logger = LogManager.getRootLogger();
 }
