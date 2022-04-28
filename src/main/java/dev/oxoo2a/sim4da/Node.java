@@ -11,6 +11,11 @@ public abstract class Node {
     public void setNetwork ( Network network ) {
         this.network = network;
     }
+
+    public void setTracer ( Tracer tracer ) {
+        this.tracer = tracer;
+    }
+
     public void start () {
         t_main.start();
     }
@@ -59,6 +64,7 @@ public abstract class Node {
 
     protected final int myId;
     private Network network;
+    private Tracer tracer;
     private final Thread t_main;
     private boolean stop;
 }

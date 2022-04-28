@@ -6,8 +6,9 @@ import java.util.concurrent.Semaphore;
 
 public class Network {
 
-    public Network ( int n_nodes ) {
+    public Network ( int n_nodes, Tracer tracer ) {
         this.n_nodes = n_nodes;
+        this.tracer = tracer;
         mqueues = new MessageQueue[n_nodes];
         for (int i=0; i<n_nodes; ++i)
             mqueues[i] = new MessageQueue();
@@ -124,6 +125,7 @@ public class Network {
     }
 
     private final int n_nodes;
+    private final Tracer tracer;
     private final MessageQueue[] mqueues;
 
     private static final Random rgen = new Random();
