@@ -8,6 +8,6 @@ public class MessageTest {
 	@Test
 	public void testMessageBasics () {
 		Message m = new Message().add("a","b");
-		assertEquals(m.query("a"), "b");
+		assertEquals(m.query("a"), "c");
 	}
 }
