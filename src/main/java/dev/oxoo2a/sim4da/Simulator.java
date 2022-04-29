@@ -1,15 +1,22 @@
 package dev.oxoo2a.sim4da;
 
 import java.util.HashMap;
-
-import dev.oxoo2a.sim4da.Network;
+import java.io.PrintStream;
 
 public class Simulator {
 
-    public Simulator ( int n_nodes ) {
-        this.n_nodes = n_nodes;
+    public static Simulator createDefaultSimulator ( int n_nodes ) {
+        return new Simulator(n_nodes, "sim4da", true, true, true, System.out);
+    }
 
-        network = new Network(n_nodes);
+    public static Simulator createSimulator_Log4j2 ( int n_nodes ) {
+        return new Simulator(n_nodes,"sim4da", true,true,true,null);
+    }
+
+    public Simulator ( int n_nodes, String name, boolean ordered, boolean enableTracing, boolean useLog4j2, PrintStream alternativeDestination ) {
+        this.n_nodes = n_nodes;
+        tracer = new Tracer(name,ordered,enableTracing,useLog4j2,alternativeDestination);
+        network = new Network(n_nodes,tracer);
         nodes = new HashMap<Integer, Node>(n_nodes);
         for (int n_id = 0; n_id < n_nodes; ++n_id)
             nodes.put(n_id, null);
@@ -25,7 +32,10 @@ public class Simulator {
         for ( Node n : nodes.values() ) {
             if (n == null) throw new InstantiationException();
             n.setNetwork(network);
+            n.setTracer(tracer);
         }
+
+        tracer.emit("Simulator::runSimulation with %d nodes for %d seconds",n_nodes,duration);
         nodes.values().forEach(Node::start);
         // Wait for the required duration
         try {
@@ -38,9 +48,11 @@ public class Simulator {
 
         // Tell all nodes to stop and wait for the threads to terminate
         nodes.values().forEach(Node::stop);
+        tracer.emit("Simulator::runSimulation finished");
     }
 
     private final int n_nodes;
+    private final Tracer tracer;
     private final Network network;
     private final HashMap<Integer, Node> nodes;
 }
