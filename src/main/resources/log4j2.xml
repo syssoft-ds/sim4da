@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
+        </Console>
+
+        <File name="logfile" fileName="sim4da-app.log" append="false">
+            <RegexFilter regex=".*sim4da.*" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+            <PatternLayout pattern="%msg%n"/>
+            <!-- <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/> -->
+        </File>
+    </Appenders>
+    <Loggers>
+        <Root level="trace">
+            <!-- <AppenderRef ref="console"/> -->
+            <AppenderRef ref="logfile"/>
+        </Root>
+    </Loggers>
+</Configuration>

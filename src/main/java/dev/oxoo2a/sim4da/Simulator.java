@@ -9,6 +9,10 @@ public class Simulator {
         return new Simulator(n_nodes, "sim4da", true, true, true, System.out);
     }
 
+    public static Simulator createSimulator_Log4j2 ( int n_nodes ) {
+        return new Simulator(n_nodes,"sim4da", true,true,true,null);
+    }
+
     public Simulator ( int n_nodes, String name, boolean ordered, boolean enableTracing, boolean useLog4j2, PrintStream alternativeDestination ) {
         this.n_nodes = n_nodes;
         tracer = new Tracer(name,ordered,enableTracing,useLog4j2,alternativeDestination);
@@ -31,7 +35,7 @@ public class Simulator {
             n.setTracer(tracer);
         }
 
-        tracer.comment("Simulator::runSimulation with "+n_nodes+" nodes for "+duration+" seconds");
+        tracer.emit("Simulator::runSimulation with %d nodes for %d seconds",n_nodes,duration);
         nodes.values().forEach(Node::start);
         // Wait for the required duration
         try {
@@ -44,6 +48,7 @@ public class Simulator {
 
         // Tell all nodes to stop and wait for the threads to terminate
         nodes.values().forEach(Node::stop);
+        tracer.emit("Simulator::runSimulation finished");
     }
 
     private final int n_nodes;

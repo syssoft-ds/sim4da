@@ -94,6 +94,7 @@ public class Network {
             System.err.printf("Network::unicast: unknown sender id %d\n",sender_id);
             return;
         }
+        tracer.emit("Unicast:%d->%d",sender_id,receiver_id);
         Message raw = new Message(sender_id,receiver_id,MessageType.UNICAST,message);
         mqueues[receiver_id].put(raw);
     }
@@ -103,6 +104,7 @@ public class Network {
             System.err.printf("Network::unicast: unknown sender id %d\n",sender_id);
             return;
         }
+        tracer.emit("Broadcast:%d->0..%d",sender_id,n_nodes-1);
         Message raw = new Message(sender_id,-1,MessageType.BROADCAST,message);
         for ( int l=0; l<n_nodes; ++l) {
             if (l == sender_id) continue;
@@ -116,7 +118,12 @@ public class Network {
             System.err.printf("Network::unicast: unknown receiver id %d\n",receiver_id);
             return null;
         }
-        return mqueues[receiver_id].await();
+        Message m = mqueues[receiver_id].await();
+        if (m != null) {
+            String m_type = m.type == MessageType.BROADCAST ? "Broadcast" : "Unicast";
+            tracer.emit("Receive %s:%d<-%d",m_type,m.receiver_id,m.sender_id);
+        }
+        return m;
     }
 
     public void stop () {

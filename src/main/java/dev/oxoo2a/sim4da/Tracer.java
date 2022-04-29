@@ -14,16 +14,17 @@ public class Tracer {
         this.useLog4j2 = useLog4j2;
         this.alternativeDestination = alternativeDestination;
 
-        log4j2Logger = LogManager.getRootLogger();
+        log4j2Logger = LogManager.getFormatterLogger(name);
     }
 
-    public void comment ( String s ) {
+    public void emit ( String format, Object ... args ) {
         if (silent) return;
         if (useLog4j2) {
-            log4j2Logger.info(name+": "+s);
+            log4j2Logger.trace(format,args);
         }
         if (alternativeDestination != null) {
-            alternativeDestination.println(s);
+            alternativeDestination.printf(format,args);
+            alternativeDestination.println();
         }
     }
 

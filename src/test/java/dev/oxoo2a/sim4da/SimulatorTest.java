@@ -8,7 +8,7 @@ public class SimulatorTest {
     @Test
     public void simpleSimulation() {
         int n_nodes = 3;
-        int duration = 5;
+        int duration = 1;
 
         Simulator s = Simulator.createDefaultSimulator(n_nodes);
         for (int id=0; id<n_nodes; id++) {
