@@ -29,7 +29,7 @@ dependencies {
 }
 
 group = 'dev.oxoo2a'
-version = '1.0-SNAPSHOT'
+version = '1.4-SNAPSHOT'
 description = 'sim4da'
 java.sourceCompatibility = JavaVersion.VERSION_17
 
