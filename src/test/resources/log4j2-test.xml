@@ -6,14 +6,15 @@
         </Console>
 
         <File name="logfile" fileName="sim4da-test.log" append="false">
-            <RegexFilter regex=".*sim4da.*" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
             <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
         </File>
     </Appenders>
     <Loggers>
-        <Root level="trace">
-            <AppenderRef ref="console"/>
+        <Logger name="sim4da" level="trace" additivity="false">
             <AppenderRef ref="logfile"/>
+        </Logger>
+        <Root level="warn">
+            <AppenderRef ref="console"/>
         </Root>
     </Loggers>
 </Configuration>
