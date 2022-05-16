@@ -16,15 +16,15 @@ public class Simulator {
         tracer = new Tracer(name, ordered, enableTracing, useLog4j2, alternativeDestination);
         network = new Network(numberOfNodes, tracer);
         nodes = new HashMap<>(numberOfNodes);
-        for (int n_id = 0; n_id <numberOfNodes; n_id++)
-            nodes.put(n_id, null);
+        for (int id = 0; id<numberOfNodes; id++)
+            nodes.put(id, null);
     }
     
     public static Simulator createDefaultSimulator(int numberOfNodes) {
         return new Simulator(numberOfNodes, "sim4da", true, true, true, System.out);
     }
     
-    public static Simulator createSimulator_Log4j2(int numberOfNodes) {
+    public static Simulator createSimulatorUsingLog4j2(int numberOfNodes) {
         return new Simulator(numberOfNodes,"sim4da", true, true, true, null);
     }
     
@@ -42,16 +42,11 @@ public class Simulator {
         }
         tracer.emit("Simulator::runSimulation with %d nodes for %d seconds", numberOfNodes, duration);
         nodes.values().forEach(Node::start);
-        // Wait for the required duration
         try {
-            Thread.sleep(duration * 1000L);
+            Thread.sleep(duration * 1000L); // Wait for the required duration
         } catch (InterruptedException ignored) {}
-        
-        // Stop network - release nodes waiting in receive ...
-        network.stop();
-        
-        // Tell all nodes to stop and wait for the threads to terminate
-        nodes.values().forEach(Node::stop);
+        network.stop(); // Stop network - release nodes waiting in receive ...
+        nodes.values().forEach(Node::stop); // Tell all nodes to stop and wait for the threads to terminate
         tracer.emit("Simulator::runSimulation finished");
     }
 }
