@@ -6,110 +6,110 @@ import java.util.concurrent.Semaphore;
 
 public class Network {
     
-    private static final Random rgen = new Random();
+    private static final Random RANDOM = new Random();
     
-    private final int n_nodes;
+    private final int numberOfNodes;
     private final Tracer tracer;
-    private final MessageQueue[] mqueues;
+    private final MessageQueue[] messageQueues;
     
     //private static Logger logger = Logger.getRootLogger();
     
-    public Network(int n_nodes, Tracer tracer) {
-        this.n_nodes = n_nodes;
+    public Network(int numberOfNodes, Tracer tracer) {
+        this.numberOfNodes = numberOfNodes;
         this.tracer = tracer;
-        mqueues = new MessageQueue[n_nodes];
-        for (int i = 0; i<n_nodes; i++)
-            mqueues[i] = new MessageQueue();
+        messageQueues = new MessageQueue[numberOfNodes];
+        for (int i = 0; i<numberOfNodes; i++)
+            messageQueues[i] = new MessageQueue();
     }
     
-    public int numberOfNodes() {
-        return n_nodes;
+    public int getNumberOfNodes() {
+        return numberOfNodes;
     }
     
-    public void unicast(int sender_id, int receiver_id, String message) {
-        if (receiver_id<0 || receiver_id>=n_nodes) {
-            System.err.printf("Network::unicast: unknown receiver id %d\n", receiver_id);
+    public void unicast(int senderId, int receiverId, String message) {
+        if (receiverId<0 || receiverId>=numberOfNodes) {
+            System.err.printf("Network::unicast: unknown receiver id %d\n", receiverId);
             return;
         }
-        if (sender_id<0 || sender_id>=n_nodes) {
-            System.err.printf("Network::unicast: unknown sender id %d\n", sender_id);
+        if (senderId<0 || senderId>=numberOfNodes) {
+            System.err.printf("Network::unicast: unknown sender id %d\n", senderId);
             return;
         }
-        tracer.emit("Unicast:%d->%d", sender_id, receiver_id);
-        Message raw = new Message(sender_id, receiver_id, MessageType.UNICAST, message);
-        mqueues[receiver_id].put(raw);
+        tracer.emit("Unicast:%d->%d", senderId, receiverId);
+        Message raw = new Message(senderId, receiverId, MessageType.UNICAST, message);
+        messageQueues[receiverId].put(raw);
     }
     
-    public void broadcast(int sender_id, String message) {
-        if (sender_id<0 || sender_id>=n_nodes) {
-            System.err.printf("Network::unicast: unknown sender id %d\n", sender_id);
+    public void broadcast(int senderId, String message) {
+        if (senderId<0 || senderId>=numberOfNodes) {
+            System.err.printf("Network::unicast: unknown sender id %d\n", senderId);
             return;
         }
-        tracer.emit("Broadcast:%d->0..%d", sender_id, n_nodes-1);
-        Message raw = new Message(sender_id, -1, MessageType.BROADCAST, message);
-        for (int l = 0; l<n_nodes; l++) {
-            if (l==sender_id) continue;
-            raw.receiver_id = l;
-            mqueues[l].put(raw);
+        tracer.emit("Broadcast:%d->0..%d", senderId, numberOfNodes-1);
+        Message raw = new Message(senderId, -1, MessageType.BROADCAST, message);
+        for (int l = 0; l<numberOfNodes; l++) {
+            if (l==senderId) continue;
+            raw.receiverId = l;
+            messageQueues[l].put(raw);
         }
     }
     
-    public Message receive(int receiver_id) {
-        if (receiver_id<0 || receiver_id>=n_nodes) {
-            System.err.printf("Network::unicast: unknown receiver id %d\n", receiver_id);
+    public Message receive(int receiverId) {
+        if (receiverId<0 || receiverId>=numberOfNodes) {
+            System.err.printf("Network::unicast: unknown receiver id %d\n", receiverId);
             return null;
         }
-        Message m = mqueues[receiver_id].await();
+        Message m = messageQueues[receiverId].await();
         if (m!=null) {
             String m_type = m.type==MessageType.BROADCAST ? "Broadcast" : "Unicast";
-            tracer.emit("Receive %s:%d<-%d", m_type, m.receiver_id, m.sender_id);
+            tracer.emit("Receive %s:%d<-%d", m_type, m.receiverId, m.senderId);
         }
         return m;
     }
     
     public void stop() {
-        for (MessageQueue mq : mqueues)
-            mq.stop();
+        for (MessageQueue queue : messageQueues)
+            queue.stop();
     }
     
     public static class Message {
-        public int sender_id;
-        public int receiver_id;
+        public int senderId;
+        public int receiverId;
         public MessageType type;
         public String payload;
-        public Message(int sender_id, int receiver_id, MessageType type, String payload) {
-            this.sender_id = sender_id;
-            this.receiver_id = receiver_id;
+        public Message(int senderId, int receiverId, MessageType type, String payload) {
+            this.senderId = senderId;
+            this.receiverId = receiverId;
             this.type = type;
             this.payload = payload;
         }
         @Override
         public String toString() {
-            return  "Network::Message(sender="+sender_id+",receiver="+receiver_id+","
+            return  "Network::Message(sender="+senderId+",receiver="+receiverId+","
                     +(type==MessageType.BROADCAST ? "Broadcast" : "Unicast")+",payload=<"+payload+">)";
         }
     }
     
     private static class MessageQueue {
         private final LinkedList<Message> queue = new LinkedList<>();
-        private final Semaphore await_message = new Semaphore(0);
+        private final Semaphore awaitMessage = new Semaphore(0);
         private boolean stop = false;
-        public void put(Message r) {
+        public void put(Message message) {
             synchronized (queue) {
-                queue.addLast(r);
-                await_message.release();
+                queue.addLast(message);
+                awaitMessage.release();
             }
         }
         public Message await() {
             while (!stop) {
                 try {
-                    await_message.acquire();
+                    awaitMessage.acquire();
                     synchronized (queue) {
                         if (!queue.isEmpty()) {
                             // Return a random message in queue avoiding FIFO order
                             if (queue.size() == 1)
                                 return queue.removeFirst();
-                            int c = rgen.nextInt(queue.size());
+                            int c = RANDOM.nextInt(queue.size());
                             return queue.remove(c);
                         }
                     }
@@ -119,7 +119,7 @@ public class Network {
         }
         public void stop() {
             stop = true;
-            await_message.release();
+            awaitMessage.release();
         }
     }
     

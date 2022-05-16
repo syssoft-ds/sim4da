@@ -5,31 +5,31 @@ import java.io.PrintStream;
 
 public class Simulator {
     
-    private final int n_nodes;
+    private final int numberOfNodes;
     private final Tracer tracer;
     private final Network network;
     private final HashMap<Integer, Node> nodes;
     
-    public Simulator(int n_nodes, String name, boolean ordered, boolean enableTracing, boolean useLog4j2,
+    public Simulator(int numberOfNodes, String name, boolean ordered, boolean enableTracing, boolean useLog4j2,
                      PrintStream alternativeDestination) {
-        this.n_nodes = n_nodes;
+        this.numberOfNodes = numberOfNodes;
         tracer = new Tracer(name, ordered, enableTracing, useLog4j2, alternativeDestination);
-        network = new Network(n_nodes, tracer);
-        nodes = new HashMap<>(n_nodes);
-        for (int n_id = 0; n_id < n_nodes; n_id++)
+        network = new Network(numberOfNodes, tracer);
+        nodes = new HashMap<>(numberOfNodes);
+        for (int n_id = 0; n_id <numberOfNodes; n_id++)
             nodes.put(n_id, null);
     }
     
-    public static Simulator createDefaultSimulator(int n_nodes) {
-        return new Simulator(n_nodes, "sim4da", true, true, true, System.out);
+    public static Simulator createDefaultSimulator(int numberOfNodes) {
+        return new Simulator(numberOfNodes, "sim4da", true, true, true, System.out);
     }
     
-    public static Simulator createSimulator_Log4j2(int n_nodes) {
-        return new Simulator(n_nodes,"sim4da", true, true, true, null);
+    public static Simulator createSimulator_Log4j2(int numberOfNodes) {
+        return new Simulator(numberOfNodes,"sim4da", true, true, true, null);
     }
     
     public void attachNode(int id, Node node) {
-        if (id>=0 && id<n_nodes)
+        if (id>=0 && id<numberOfNodes)
             nodes.replace(id, node);
     }
     
@@ -40,7 +40,7 @@ public class Simulator {
             n.setNetwork(network);
             n.setTracer(tracer);
         }
-        tracer.emit("Simulator::runSimulation with %d nodes for %d seconds", n_nodes, duration);
+        tracer.emit("Simulator::runSimulation with %d nodes for %d seconds", numberOfNodes, duration);
         nodes.values().forEach(Node::start);
         // Wait for the required duration
         try {

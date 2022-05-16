@@ -14,7 +14,7 @@ public class BroadcastNode extends Node {
         Random r = new Random();
         // System.out.printf("This is node %d\n", myId());
         // Create a message with a random candidate to send the next broadcast
-        Message m_broadcast = new Message().add("Sender", myId).add("Candidate", r.nextInt(numberOfNodes()));
+        Message m_broadcast = new Message().add("Sender", myId).add("Candidate", r.nextInt(getNumberOfNodes()));
         sendBroadcast(m_broadcast);
         int broadcasts_received = 0;
         int broadcasts_sent = 0;
@@ -31,7 +31,7 @@ public class BroadcastNode extends Node {
             // send a broadcast message anyway :-)
             if (c == myId || r.nextInt(100) < 5) {
                 // The next sender for a broadcast message is selected randomly
-                m_broadcast.add("Candidate",r.nextInt(numberOfNodes()));
+                m_broadcast.add("Candidate",r.nextInt(getNumberOfNodes()));
                 sendBroadcast(m_broadcast);
                 broadcasts_sent++;
             }

@@ -9,7 +9,7 @@ import com.google.gson.reflect.TypeToken;
 
 public class Message {
     
-    private static final Gson serializer = new Gson();
+    private static final Gson SERIALIZER = new Gson();
     
     private final HashMap<String, String> content;
     
@@ -45,10 +45,10 @@ public class Message {
     
     public static Message fromJson(String s) {
         Type contentType = new TypeToken<HashMap<String, String>>() {}.getType();
-        return new Message(serializer.fromJson(s, contentType));
+        return new Message(SERIALIZER.fromJson(s, contentType));
     }
     
     private static synchronized String serialize(Map<String, String> content) {
-        return serializer.toJson(content); // Not sure about thread safety of Gson
+        return SERIALIZER.toJson(content); // Not sure about thread safety of Gson
     }
 }

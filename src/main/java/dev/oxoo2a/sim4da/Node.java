@@ -5,11 +5,11 @@ public abstract class Node {
     protected final int myId;
     private Network network;
     private Tracer tracer;
-    private final Thread t_main = new Thread(this::main);
+    private final Thread thread = new Thread(this::main);
     private boolean stop = false;
     
-    public Node(int my_id) {
-        this.myId = my_id;
+    public Node(int myId) {
+        this.myId = myId;
     }
     
     public void setNetwork(Network network) {
@@ -21,13 +21,13 @@ public abstract class Node {
     }
     
     public void start() {
-        t_main.start();
+        thread.start();
     }
     
     public void stop () {
         stop = true;
         try {
-            t_main.join();
+            thread.join();
         } catch (InterruptedException ignored) {}
     }
     
@@ -37,28 +37,28 @@ public abstract class Node {
         } catch (InterruptedException ignored) {}
     }
     
-    protected int numberOfNodes() {
-        return network.numberOfNodes();
+    protected int getNumberOfNodes() {
+        return network.getNumberOfNodes();
     }
     
     protected boolean stillSimulating() {
         return !stop;
     }
     
-    protected void sendUnicast(int receiver_id, String m) {
-        network.unicast(myId, receiver_id, m);
+    protected void sendUnicast(int receiverId, String m) {
+        network.unicast(myId, receiverId, m);
     }
     
-    protected void sendUnicast(int receiver_id, Message m) {
-        network.unicast(myId, receiver_id, m.toJson());
+    protected void sendUnicast(int receiverId, Message m) {
+        network.unicast(myId, receiverId, m.toJson());
     }
     
     protected void sendBroadcast(String m) {
         network.broadcast(myId, m);
     }
     
-    protected void sendBroadcast(Message m) {
-        network.broadcast(myId, m.toJson());
+    protected void sendBroadcast(Message message) {
+        network.broadcast(myId, message.toJson());
     }
     
     protected Network.Message receive() {
