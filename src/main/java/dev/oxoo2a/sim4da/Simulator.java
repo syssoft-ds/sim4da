@@ -15,7 +15,7 @@ public class Simulator {
         this.n_nodes = n_nodes;
         tracer = new Tracer(name, ordered, enableTracing, useLog4j2, alternativeDestination);
         network = new Network(n_nodes, tracer);
-        nodes = new HashMap<Integer, Node>(n_nodes);
+        nodes = new HashMap<>(n_nodes);
         for (int n_id = 0; n_id < n_nodes; ++n_id)
             nodes.put(n_id, null);
     }
@@ -29,7 +29,7 @@ public class Simulator {
     }
     
     public void attachNode(int id, Node node) {
-        if ((0 <= id) && (id < n_nodes))
+        if (id >= 0 && id < n_nodes)
             nodes.replace(id,node);
     }
     

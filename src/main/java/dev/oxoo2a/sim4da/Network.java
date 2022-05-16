@@ -27,11 +27,11 @@ public class Network {
     }
     
     public void unicast(int sender_id, int receiver_id, String message) {
-        if ((receiver_id < 0) || (receiver_id >= n_nodes)) {
+        if (receiver_id < 0 || receiver_id >= n_nodes) {
             System.err.printf("Network::unicast: unknown receiver id %d\n", receiver_id);
             return;
         }
-        if ((sender_id < 0) || (sender_id >= n_nodes)) {
+        if (sender_id < 0 || sender_id >= n_nodes) {
             System.err.printf("Network::unicast: unknown sender id %d\n", sender_id);
             return;
         }
@@ -41,7 +41,7 @@ public class Network {
     }
     
     public void broadcast(int sender_id, String message) {
-        if ((sender_id < 0) || (sender_id >= n_nodes)) {
+        if (sender_id < 0 || sender_id >= n_nodes) {
             System.err.printf("Network::unicast: unknown sender id %d\n", sender_id);
             return;
         }
@@ -55,8 +55,8 @@ public class Network {
     }
     
     public Message receive(int receiver_id) {
-        if ((receiver_id < 0) || (receiver_id >= n_nodes)) {
-            System.err.printf("Network::unicast: unknown receiver id %d\n",receiver_id);
+        if (receiver_id < 0 || receiver_id >= n_nodes) {
+            System.err.printf("Network::unicast: unknown receiver id %d\n", receiver_id);
             return null;
         }
         Message m = mqueues[receiver_id].await();
@@ -68,11 +68,11 @@ public class Network {
     }
     
     public void stop() {
-        for ( MessageQueue mq : mqueues )
+        for (MessageQueue mq : mqueues)
             mq.stop();
     }
     
-    public class Message {
+    public static class Message {
         public int sender_id;
         public int receiver_id;
         public MessageType type;
@@ -83,6 +83,7 @@ public class Network {
             this.type = type;
             this.payload = payload;
         }
+        @Override
         public String toString() {
             String r = "Network::Message(sender="+sender_id+",receiver="+receiver_id+",";
             r += type == MessageType.BROADCAST ? "Broadcast" : "Unicast";
@@ -91,7 +92,7 @@ public class Network {
         }
     }
     
-    private class MessageQueue {
+    private static class MessageQueue {
         private final LinkedList<Message> queue;
         private final Semaphore await_message;
         private boolean stop;
@@ -116,14 +117,11 @@ public class Network {
                             // Return a random message in queue avoiding FIFO order
                             if (queue.size() == 1)
                                 return queue.removeFirst();
-                            else {
-                                int c = rgen.nextInt(queue.size());
-                                return queue.remove(c);
-                            }
+                            int c = rgen.nextInt(queue.size());
+                            return queue.remove(c);
                         }
                     }
-                }
-                catch (InterruptedException e) {};
+                } catch (InterruptedException ignored) {}
             }
         }
         public void stop() {

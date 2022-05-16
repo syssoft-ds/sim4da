@@ -30,15 +30,13 @@ public abstract class Node {
         stop = true;
         try {
             t_main.join();
-        }
-        catch (InterruptedException ignored) {};
+        } catch (InterruptedException ignored) {}
     }
     
     private void sleep(long millis) {
         try {
             Thread.sleep(millis);
-        }
-        catch (InterruptedException e) {};
+        } catch (InterruptedException ignored) {}
     }
     
     protected int numberOfNodes() {
@@ -70,5 +68,5 @@ public abstract class Node {
     }
     
     // Module implements basic node functionality
-    protected abstract void main ();
+    protected abstract void main();
 }

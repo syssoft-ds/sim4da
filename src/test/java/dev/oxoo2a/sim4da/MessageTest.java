@@ -1,6 +1,6 @@
 package dev.oxoo2a.sim4da;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
 
@@ -15,16 +15,16 @@ public class MessageTest {
     
     @Test
     public void testMessageBasics () {
-        assertEquals(m.query("a"), "b");
-        assertEquals(m.query("c"), "d");
-        assertEquals(m.query("no_key"),null);
+        Assertions.assertEquals(m.query("a"), "b");
+        Assertions.assertEquals(m.query("c"), "d");
+        Assertions.assertNull(m.query("no_key"));
     }
     
     @Test
     public void serializeAndDeserialize () {
         String m_json = m.toJson();
         Message m2 = Message.fromJson(m_json);
-        assertEquals(m2.query("a"),"b");
-        assertEquals(m2.query("c"),"d");
+        Assertions.assertEquals(m2.query("a"),"b");
+        Assertions.assertEquals(m2.query("c"),"d");
     }
 }
