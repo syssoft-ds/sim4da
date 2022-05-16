@@ -5,13 +5,11 @@ public abstract class Node {
     protected final int myId;
     private Network network;
     private Tracer tracer;
-    private final Thread t_main;
-    private boolean stop;
+    private final Thread t_main = new Thread(this::main);
+    private boolean stop = false;
     
     public Node(int my_id) {
         this.myId = my_id;
-        stop = false;
-        t_main = new Thread(this::main);
     }
     
     public void setNetwork(Network network) {

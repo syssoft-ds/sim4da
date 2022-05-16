@@ -2,16 +2,10 @@ package dev.oxoo2a.sim4da;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeAll;
 
 public class MessageTest {
     
-    private static Message m;
-    
-    @BeforeAll
-    public static void createMessage () {
-        m = new Message().add("a","b").add("c","d");
-    }
+    private static final Message m = new Message().add("a","b").add("c","d");
     
     @Test
     public void testMessageBasics () {

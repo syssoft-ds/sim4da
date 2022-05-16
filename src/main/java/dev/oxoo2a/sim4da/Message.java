@@ -35,7 +35,7 @@ public class Message {
         return content.get(key);
     }
     
-    public Map<String,String> getMap() {
+    public Map<String, String> getMap() {
         return content;
     }
     
@@ -44,7 +44,7 @@ public class Message {
     }
     
     public static Message fromJson(String s) {
-        Type contentType = new TypeToken<HashMap<String,String>>() {}.getType();
+        Type contentType = new TypeToken<HashMap<String, String>>() {}.getType();
         return new Message(serializer.fromJson(s, contentType));
     }
     

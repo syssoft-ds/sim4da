@@ -16,7 +16,7 @@ public class Simulator {
         tracer = new Tracer(name, ordered, enableTracing, useLog4j2, alternativeDestination);
         network = new Network(n_nodes, tracer);
         nodes = new HashMap<>(n_nodes);
-        for (int n_id = 0; n_id < n_nodes; ++n_id)
+        for (int n_id = 0; n_id < n_nodes; n_id++)
             nodes.put(n_id, null);
     }
     
@@ -29,14 +29,14 @@ public class Simulator {
     }
     
     public void attachNode(int id, Node node) {
-        if (id >= 0 && id < n_nodes)
-            nodes.replace(id,node);
+        if (id>=0 && id<n_nodes)
+            nodes.replace(id, node);
     }
     
     public void runSimulation(int duration) throws InstantiationException {
         // Check that all nodes are attached
         for (Node n : nodes.values()) {
-            if (n == null) throw new InstantiationException();
+            if (n==null) throw new InstantiationException();
             n.setNetwork(network);
             n.setTracer(tracer);
         }
@@ -45,8 +45,7 @@ public class Simulator {
         // Wait for the required duration
         try {
             Thread.sleep(duration * 1000L);
-        }
-        catch (InterruptedException ignored) {}
+        } catch (InterruptedException ignored) {}
         
         // Stop network - release nodes waiting in receive ...
         network.stop();
