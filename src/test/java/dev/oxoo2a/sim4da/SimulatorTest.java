@@ -7,13 +7,14 @@ import java.beans.Transient;
 import org.junit.jupiter.api.Test;
 
 public class SimulatorTest {
+    
     private final int n_nodes = 3;
     private final int duration = 2;
-
+    
     @Test
     public void simpleSimulation() {
         Simulator s = Simulator.createDefaultSimulator(n_nodes);
-        for (int id=0; id<n_nodes; id++) {
+        for (int id = 0; id<n_nodes; id++) {
             Node n = new BroadcastNode(id);
             s.attachNode(id,n);
         }
@@ -24,7 +25,7 @@ public class SimulatorTest {
             fail("Not all nodes instantiated");
         }
     }
-
+    
     @Test
     public void someNodesNotInstantiated () {
         Simulator s = Simulator.createDefaultSimulator(n_nodes);

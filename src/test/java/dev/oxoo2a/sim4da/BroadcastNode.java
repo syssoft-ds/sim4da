@@ -3,18 +3,19 @@ package dev.oxoo2a.sim4da;
 import java.util.Random;
 
 public class BroadcastNode extends Node {
+    
     // The superclass needs its ID
-    public BroadcastNode ( int id ) {
+    public BroadcastNode(int id) {
         super(id);
     }
-
-    public void main () {
+    
+    public void main() {
         Random r = new Random();
         int broadcasts_received = 0;
         int broadcasts_sent = 0;
         // System.out.printf("This is node %d\n", myId());
         // Create a message with a random candidate to send the next broadcast
-        Message m_broadcast = new Message().add("Sender",myId).add("Candidate",r.nextInt(numberOfNodes()));
+        Message m_broadcast = new Message().add("Sender", myId).add("Candidate", r.nextInt(numberOfNodes()));
         sendBroadcast(m_broadcast);
         while (stillSimulating()) {
             Network.Message m_raw = receive();
