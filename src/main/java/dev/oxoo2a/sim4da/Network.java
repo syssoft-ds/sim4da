@@ -85,10 +85,8 @@ public class Network {
         }
         @Override
         public String toString() {
-            String r = "Network::Message(sender="+sender_id+",receiver="+receiver_id+",";
-            r += type == MessageType.BROADCAST ? "Broadcast" : "Unicast";
-            r += ",payload=<"+payload+">)";
-            return r;
+            return  "Network::Message(sender="+sender_id+",receiver="+receiver_id+","
+                    +(type==MessageType.BROADCAST ? "Broadcast" : "Unicast")+",payload=<"+payload+">)";
         }
     }
     
