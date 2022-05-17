@@ -12,7 +12,7 @@ public class SimulatorTest {
     public void simpleSimulation() {
         Simulator s = Simulator.createDefaultSimulator(numberOfNodes);
         for (int id = 0; id<numberOfNodes; id++) {
-            Node n = new BroadcastNode(id);
+            Node n = new BroadcastNode(s, id);
             s.attachNode(id, n);
         }
         try {
@@ -25,8 +25,8 @@ public class SimulatorTest {
     @Test
     public void someNodesNotInstantiated () {
         Simulator s = Simulator.createDefaultSimulator(numberOfNodes);
-        s.attachNode(0, new BroadcastNode(0));
-        s.attachNode(1, new BroadcastNode(1));
+        s.attachNode(0, new BroadcastNode(s, 0));
+        s.attachNode(1, new BroadcastNode(s, 1));
         Assertions.assertThrows(InstantiationException.class,() -> s.runSimulation(duration));
     }
 }

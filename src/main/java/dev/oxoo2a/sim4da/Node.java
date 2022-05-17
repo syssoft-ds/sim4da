@@ -12,21 +12,13 @@ public abstract class Node {
     
     protected final int id;
     private final MessageQueue messageQueue = new MessageQueue();
-    private Simulator simulator;
-    private Tracer tracer;
+    private final Simulator simulator;
     private final Thread thread = new Thread(this::run);
     private boolean stop = false;
     
-    public Node(int id) {
-        this.id = id;
-    }
-    
-    public void setSimulator(Simulator simulator) {
+    public Node(Simulator simulator, int id) {
         this.simulator = simulator;
-    }
-    
-    public void setTracer(Tracer tracer) {
-        this.tracer = tracer;
+        this.id = id;
     }
     
     public void start() {
@@ -69,7 +61,7 @@ public abstract class Node {
         Message m = messageQueue.await();
         if (m!=null) {
             String messageTypeString = m.type==MessageType.BROADCAST ? "Broadcast" : "Unicast";
-            tracer.emit("Receive %s:%d<-%d", messageTypeString, m.receiverId, m.senderId);
+            simulator.emitToTracer("Receive %s:%d<-%d", messageTypeString, m.receiverId, m.senderId);
         }
         return m;
     }

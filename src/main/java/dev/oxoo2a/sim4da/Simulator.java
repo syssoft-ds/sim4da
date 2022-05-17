@@ -31,8 +31,6 @@ public class Simulator {
         // Check that all nodes are attached
         for (Node node : nodes) {
             if (node==null) throw new InstantiationException();
-            node.setSimulator(this);
-            node.setTracer(tracer);
         }
         tracer.emit("Simulator::runSimulation with %d nodes for %d seconds", nodes.length, duration);
         for (Node node : nodes) {
@@ -60,7 +58,7 @@ public class Simulator {
             System.err.printf("Network::unicast: unknown sender id %d\n", senderId);
             return;
         }
-        tracer.emit("Unicast:%d->%d", senderId, receiverId);
+        emitToTracer("Unicast:%d->%d", senderId, receiverId);
         Message raw = new Message(senderId, receiverId, MessageType.UNICAST, message);
         nodes[receiverId].putInMessageQueue(raw);
     }
@@ -70,7 +68,7 @@ public class Simulator {
             System.err.printf("Network::broadcast: unknown sender id %d\n", senderId);
             return;
         }
-        tracer.emit("Broadcast:%d->0..%d", senderId, nodes.length-1);
+        emitToTracer("Broadcast:%d->0..%d", senderId, nodes.length-1);
         Message raw = new Message(senderId, -1, MessageType.BROADCAST, message);
         for (int i = 0; i<nodes.length; i++) {
             if (i==senderId) continue;
@@ -79,5 +77,9 @@ public class Simulator {
                                 // i times, all nodes will see receiverId==i-1 after the loop.
             nodes[i].putInMessageQueue(raw);
         }
+    }
+    
+    public void emitToTracer(String format, Object... args) {
+        tracer.emit(format, args);
     }
 }
