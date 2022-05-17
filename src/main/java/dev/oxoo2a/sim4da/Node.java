@@ -1,8 +1,7 @@
 package dev.oxoo2a.sim4da;
 
-import java.util.LinkedList;
 import java.util.Random;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.PriorityBlockingQueue;
 
 import dev.oxoo2a.sim4da.Message.MessageType;
 
@@ -23,7 +22,7 @@ public abstract class Node implements Runnable {
     }
     
     public void stop() {
-        messageQueue.stop(); // Stop waiting in receive
+        thread.interrupt(); // Stop waiting in receive
         try {
             thread.join();
         } catch (InterruptedException ignored) {}
@@ -76,32 +75,30 @@ public abstract class Node implements Runnable {
     public abstract void run();
     
     private class MessageQueue {
-        private final LinkedList<Message> queue = new LinkedList<>();
-        private final Semaphore awaitMessage = new Semaphore(0);
+        // To avoid reading all messages in FIFO order (which is not guaranteed in a real network)
+        // we order them according to a random but fixed priority.
+        // All BlockingQueue implementations are thread-safe, so no external synchronization is required.
+        private final PriorityBlockingQueue<MessageWithPriority> queue = new PriorityBlockingQueue<>();
         private void put(Message message) {
-            synchronized (queue) {
-                queue.addLast(message);
-                awaitMessage.release();
-            }
+            queue.put(new MessageWithPriority(message));
         }
         private Message await() {
-            while (isStillSimulating()) {
-                try {
-                    awaitMessage.acquire();
-                    synchronized (queue) {
-                        if (!queue.isEmpty()) {
-                            // Return a random message in queue avoiding FIFO order
-                            if (queue.size()==1) return queue.removeFirst();
-                            int c = getRandom().nextInt(queue.size());
-                            return queue.remove(c);
-                        }
-                    }
-                } catch (InterruptedException ignored) {}
-            }
+            try {
+                return queue.take().message;
+            } catch (InterruptedException ignored) {}
             return null; // Simulation time ended before a message was received
         }
-        private void stop() {
-            awaitMessage.release();
+        private class MessageWithPriority implements Comparable<MessageWithPriority> {
+            private final Message message;
+            private final int priority;
+            private MessageWithPriority(Message message) {
+                this.message = message;
+                this.priority = getRandom().nextInt(100); //limit range to avoid int overflows when comparing
+            }
+            @Override
+            public int compareTo(MessageWithPriority other) {
+                return priority-other.priority;
+            }
         }
     }
 }
