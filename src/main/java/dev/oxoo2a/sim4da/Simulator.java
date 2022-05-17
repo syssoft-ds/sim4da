@@ -9,18 +9,20 @@ public class Simulator {
     private final Tracer tracer;
     private final Node[] nodes;
     
-    public Simulator(int numberOfNodes, String name, boolean ordered, boolean enableTracing, boolean useLog4j2,
+    public Simulator(int numberOfNodes, String name, boolean ordered, boolean useLog4j2,
                      PrintStream alternativeDestination) {
-        tracer = new Tracer(name, ordered, enableTracing, useLog4j2, alternativeDestination);
+        if (useLog4j2 || alternativeDestination!=null)
+            tracer = new Tracer(name, ordered, useLog4j2, alternativeDestination);
+        else tracer = null; //no tracing
         nodes = new Node[numberOfNodes];
     }
     
     public static Simulator createDefaultSimulator(int numberOfNodes) {
-        return new Simulator(numberOfNodes, "sim4da", true, true, true, System.out);
+        return new Simulator(numberOfNodes, "sim4da", true, true, System.out);
     }
     
     public static Simulator createSimulatorUsingLog4j2(int numberOfNodes) {
-        return new Simulator(numberOfNodes, "sim4da", true, true, true, null);
+        return new Simulator(numberOfNodes, "sim4da", true, true, null);
     }
     
     public void attachNode(int id, Node node) {
@@ -32,7 +34,7 @@ public class Simulator {
         for (Node node : nodes) {
             if (node==null) throw new InstantiationException();
         }
-        tracer.emit("Simulator::runSimulation with %d nodes for %d seconds", nodes.length, duration);
+        emitToTracer("Simulator::runSimulation with %d nodes for %d seconds", nodes.length, duration);
         for (Node node : nodes) {
             node.start();
         }
@@ -42,7 +44,7 @@ public class Simulator {
         for (Node node : nodes) { // Tell all nodes to stop and wait for the threads to terminate
             node.stop();
         }
-        tracer.emit("Simulator::runSimulation finished");
+        emitToTracer("Simulator::runSimulation finished");
     }
     
     public int getNumberOfNodes() {
@@ -80,6 +82,6 @@ public class Simulator {
     }
     
     public void emitToTracer(String format, Object... args) {
-        tracer.emit(format, args);
+        if (tracer!=null) tracer.emit(format, args);
     }
 }
