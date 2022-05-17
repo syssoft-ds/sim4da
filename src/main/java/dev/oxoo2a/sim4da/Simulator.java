@@ -28,8 +28,13 @@ public class Simulator {
         return new Simulator(numberOfNodes, "sim4da", true, true, null);
     }
     
-    public void attachNode(int id, Node node) {
-        if (id>=0 && id<nodes.length) nodes[id]=node;
+    public void attachNode(Node node) throws IllegalArgumentException {
+        synchronized (nodes) { // Required for the check whether this node id already exists
+            if (node.id>=0 && node.id<nodes.length) {
+                if (nodes[node.id]==null) nodes[node.id]=node;
+                else throw new IllegalArgumentException("Node with id "+node.id+" already exists in this simulator");
+            } else throw new IllegalArgumentException("Node id out of range: "+node.id);
+        }
     }
     
     public void runSimulation(int duration) throws InstantiationException {
