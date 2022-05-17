@@ -1,6 +1,5 @@
 package dev.oxoo2a.sim4da;
 
-import java.util.HashMap;
 import java.io.PrintStream;
 
 public class Simulator {
@@ -8,16 +7,14 @@ public class Simulator {
     private final int numberOfNodes;
     private final Tracer tracer;
     private final Network network;
-    private final HashMap<Integer, Node> nodes;
+    private final Node[] nodes;
     
     public Simulator(int numberOfNodes, String name, boolean ordered, boolean enableTracing, boolean useLog4j2,
                      PrintStream alternativeDestination) {
         this.numberOfNodes = numberOfNodes;
         tracer = new Tracer(name, ordered, enableTracing, useLog4j2, alternativeDestination);
         network = new Network(numberOfNodes, tracer);
-        nodes = new HashMap<>(numberOfNodes);
-        for (int id = 0; id<numberOfNodes; id++)
-            nodes.put(id, null);
+        nodes = new Node[numberOfNodes];
     }
     
     public static Simulator createDefaultSimulator(int numberOfNodes) {
@@ -29,24 +26,27 @@ public class Simulator {
     }
     
     public void attachNode(int id, Node node) {
-        if (id>=0 && id<numberOfNodes)
-            nodes.replace(id, node);
+        if (id>=0 && id<numberOfNodes) nodes[id]=node;
     }
     
     public void runSimulation(int duration) throws InstantiationException {
         // Check that all nodes are attached
-        for (Node n : nodes.values()) {
-            if (n==null) throw new InstantiationException();
-            n.setNetwork(network);
-            n.setTracer(tracer);
+        for (Node node : nodes) {
+            if (node==null) throw new InstantiationException();
+            node.setNetwork(network);
+            node.setTracer(tracer);
         }
         tracer.emit("Simulator::runSimulation with %d nodes for %d seconds", numberOfNodes, duration);
-        nodes.values().forEach(Node::start);
+        for (Node node : nodes) {
+            node.start();
+        }
         try {
             Thread.sleep(duration * 1000L); // Wait for the required duration
         } catch (InterruptedException ignored) {}
         network.stop(); // Stop network - release nodes waiting in receive ...
-        nodes.values().forEach(Node::stop); // Tell all nodes to stop and wait for the threads to terminate
+        for (Node node : nodes) { // Tell all nodes to stop and wait for the threads to terminate
+            node.stop();
+        }
         tracer.emit("Simulator::runSimulation finished");
     }
 }
