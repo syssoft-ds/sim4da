@@ -44,7 +44,7 @@ public class Network {
     
     public void broadcast(int senderId, String message) {
         if (senderId<0 || senderId>=numberOfNodes) {
-            System.err.printf("Network::unicast: unknown sender id %d\n", senderId);
+            System.err.printf("Network::broadcast: unknown sender id %d\n", senderId);
             return;
         }
         tracer.emit("Broadcast:%d->0..%d", senderId, numberOfNodes-1);
@@ -58,7 +58,7 @@ public class Network {
     
     public Message receive(int receiverId) {
         if (receiverId<0 || receiverId>=numberOfNodes) {
-            System.err.printf("Network::unicast: unknown receiver id %d\n", receiverId);
+            System.err.printf("Network::receive: unknown receiver id %d\n", receiverId);
             return null;
         }
         Message m = messageQueues[receiverId].await();

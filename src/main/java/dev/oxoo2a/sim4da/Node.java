@@ -2,14 +2,14 @@ package dev.oxoo2a.sim4da;
 
 public abstract class Node {
     
-    protected final int myId;
+    protected final int id;
     private Network network;
     private Tracer tracer;
-    private final Thread thread = new Thread(this::main);
+    private final Thread thread = new Thread(this::run);
     private boolean stop = false;
     
-    public Node(int myId) {
-        this.myId = myId;
+    public Node(int id) {
+        this.id = id;
     }
     
     public void setNetwork(Network network) {
@@ -31,12 +31,6 @@ public abstract class Node {
         } catch (InterruptedException ignored) {}
     }
     
-    private void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException ignored) {}
-    }
-    
     protected int getNumberOfNodes() {
         return network.getNumberOfNodes();
     }
@@ -46,25 +40,25 @@ public abstract class Node {
     }
     
     protected void sendUnicast(int receiverId, String messageContent) {
-        network.unicast(myId, receiverId, messageContent);
+        network.unicast(id, receiverId, messageContent);
     }
     
     protected void sendUnicast(int receiverId, JsonSerializableMap messageContent) {
-        network.unicast(myId, receiverId, messageContent.toJson());
+        network.unicast(id, receiverId, messageContent.toJson());
     }
     
     protected void sendBroadcast(String messageContent) {
-        network.broadcast(myId, messageContent);
+        network.broadcast(id, messageContent);
     }
     
     protected void sendBroadcast(JsonSerializableMap messageContent) {
-        network.broadcast(myId, messageContent.toJson());
+        network.broadcast(id, messageContent.toJson());
     }
     
     protected Message receive() {
-        return network.receive(myId);
+        return network.receive(id);
     }
     
     // Module implements basic node functionality
-    protected abstract void main();
+    protected abstract void run();
 }

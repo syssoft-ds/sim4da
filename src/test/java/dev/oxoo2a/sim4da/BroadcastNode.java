@@ -10,34 +10,35 @@ public class BroadcastNode extends Node {
     }
     
     @Override
-    public void main() {
+    public void run() {
         Random r = new Random();
-        // System.out.printf("This is node %d\n", myId());
+        // System.out.printf("This is node %d\n", id);
         // Create a message with a random candidate to send the next broadcast
-        JsonSerializableMap m_broadcast = new JsonSerializableMap();
-        m_broadcast.put("Sender", String.valueOf(myId));
-        m_broadcast.put("Candidate", String.valueOf(r.nextInt(getNumberOfNodes())));
-        sendBroadcast(m_broadcast);
-        int broadcasts_received = 0;
-        int broadcasts_sent = 0;
+        JsonSerializableMap broadcastContent = new JsonSerializableMap();
+        broadcastContent.put("Sender", String.valueOf(id));
+        broadcastContent.put("Candidate", String.valueOf(r.nextInt(getNumberOfNodes())));
+        sendBroadcast(broadcastContent);
+        int broadcastsReceived = 0;
+        int broadcastsSent = 0;
         while (stillSimulating()) {
-            Message m_raw = receive();
-            if (m_raw == null) break; // Null == Simulation time ends while waiting for a message
-            broadcasts_received++;
-            // The following printf shows the elements of Network.Message except the message type unicast or broadcast
-            // System.out.printf("%d: from %d, payload=<%s>\n",myId(),m_raw.sender_id,m_raw.payload);
+            Message message = receive();
+            if (message==null) break; // Null == Simulation time ends while waiting for a message
+            broadcastsReceived++;
+            // The following printf shows the elements of Message except the message type (unicast or broadcast)
+            // System.out.printf("%d: from %d, payload=<%s>\n", id, message.senderId, message.payload);
             // JSON encoded messages must be deserialized into a Message object
-            JsonSerializableMap m_json = JsonSerializableMap.fromJson(m_raw.payload);
-            int c = Integer.parseInt(m_json.get("Candidate"));
+            JsonSerializableMap receivedContent = JsonSerializableMap.fromJson(message.payload);
+            int c = Integer.parseInt(receivedContent.get("Candidate"));
             // Who's the next candidate for sending a broadcast message. There's also a small probability, that we
             // send a broadcast message anyway :-)
-            if (c == myId || r.nextInt(100) < 5) {
+            if (c==id || r.nextInt(100)<5) {
                 // The next sender for a broadcast message is selected randomly
-                m_broadcast.put("Candidate", String.valueOf(r.nextInt(getNumberOfNodes())));
-                sendBroadcast(m_broadcast);
-                broadcasts_sent++;
+                broadcastContent.put("Candidate", String.valueOf(r.nextInt(getNumberOfNodes())));
+                sendBroadcast(broadcastContent);
+                broadcastsSent++;
             }
         }
-        System.out.printf("%d: %d broadcasts received and %d broadcasts sent\n",myId,broadcasts_received,broadcasts_sent);
+        System.out.printf("%d: %d broadcasts received and %d broadcasts sent\n", id,
+                broadcastsReceived, broadcastsSent);
     }
 }
