@@ -6,12 +6,12 @@ import java.util.concurrent.Semaphore;
 
 import dev.oxoo2a.sim4da.Message.MessageType;
 
-public abstract class Node {
+public abstract class Node implements Runnable {
     
     protected final int id;
     private final MessageQueue messageQueue = new MessageQueue();
     private final Simulator simulator;
-    private final Thread thread = new Thread(this::run);
+    private final Thread thread = new Thread(this);
     
     public Node(Simulator simulator, int id) {
         this.simulator = simulator;
@@ -71,8 +71,9 @@ public abstract class Node {
         messageQueue.put(message);
     }
     
-    // Module implements basic node functionality
-    protected abstract void run();
+    // Class implements only basic node functionality
+    @Override
+    public abstract void run();
     
     private class MessageQueue {
         private final LinkedList<Message> queue = new LinkedList<>();
