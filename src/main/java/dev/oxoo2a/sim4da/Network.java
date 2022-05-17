@@ -4,26 +4,24 @@ import dev.oxoo2a.sim4da.Message.MessageType;
 
 public class Network {
     
-    private final int numberOfNodes;
     private final Tracer tracer;
     private final Node[] nodes;
     
-    public Network(int numberOfNodes, Node[] nodes, Tracer tracer) {
-        this.numberOfNodes = numberOfNodes;
+    public Network(Node[] nodes, Tracer tracer) {
         this.nodes = nodes;
         this.tracer = tracer;
     }
     
     public int getNumberOfNodes() {
-        return numberOfNodes;
+        return nodes.length;
     }
     
     public void unicast(int senderId, int receiverId, String message) {
-        if (receiverId<0 || receiverId>=numberOfNodes) {
+        if (receiverId<0 || receiverId>=nodes.length) {
             System.err.printf("Network::unicast: unknown receiver id %d\n", receiverId);
             return;
         }
-        if (senderId<0 || senderId>=numberOfNodes) {
+        if (senderId<0 || senderId>=nodes.length) {
             System.err.printf("Network::unicast: unknown sender id %d\n", senderId);
             return;
         }
@@ -33,28 +31,30 @@ public class Network {
     }
     
     public void broadcast(int senderId, String message) {
-        if (senderId<0 || senderId>=numberOfNodes) {
+        if (senderId<0 || senderId>=nodes.length) {
             System.err.printf("Network::broadcast: unknown sender id %d\n", senderId);
             return;
         }
-        tracer.emit("Broadcast:%d->0..%d", senderId, numberOfNodes-1);
+        tracer.emit("Broadcast:%d->0..%d", senderId, nodes.length-1);
         Message raw = new Message(senderId, -1, MessageType.BROADCAST, message);
-        for (int l = 0; l<numberOfNodes; l++) {
-            if (l==senderId) continue;
-            raw.receiverId = l;
-            nodes[l].putInMessageQueue(raw);
+        for (int i = 0; i<nodes.length; i++) {
+            if (i==senderId) continue;
+            raw.receiverId = i; //TODO This is most probably not correct.
+                                // Since there is only a single Message object whose receiverId is overwritten
+                                // i times, all nodes will see receiverId==i-1 after the loop.
+            nodes[i].putInMessageQueue(raw);
         }
     }
     
     public Message receive(int receiverId) {
-        if (receiverId<0 || receiverId>=numberOfNodes) {
+        if (receiverId<0 || receiverId>=nodes.length) {
             System.err.printf("Network::receive: unknown receiver id %d\n", receiverId);
             return null;
         }
         Message m = nodes[receiverId].awaitFromMessageQueue();
         if (m!=null) {
-            String m_type = m.type==MessageType.BROADCAST ? "Broadcast" : "Unicast";
-            tracer.emit("Receive %s:%d<-%d", m_type, m.receiverId, m.senderId);
+            String messageTypeString = m.type==MessageType.BROADCAST ? "Broadcast" : "Unicast";
+            tracer.emit("Receive %s:%d<-%d", messageTypeString, m.receiverId, m.senderId);
         }
         return m;
     }

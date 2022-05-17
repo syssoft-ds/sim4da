@@ -4,17 +4,15 @@ import java.io.PrintStream;
 
 public class Simulator {
     
-    private final int numberOfNodes;
     private final Tracer tracer;
     private final Network network;
     private final Node[] nodes;
     
     public Simulator(int numberOfNodes, String name, boolean ordered, boolean enableTracing, boolean useLog4j2,
                      PrintStream alternativeDestination) {
-        this.numberOfNodes = numberOfNodes;
         tracer = new Tracer(name, ordered, enableTracing, useLog4j2, alternativeDestination);
         nodes = new Node[numberOfNodes];
-        network = new Network(numberOfNodes, nodes, tracer);
+        network = new Network(nodes, tracer);
     }
     
     public static Simulator createDefaultSimulator(int numberOfNodes) {
@@ -22,11 +20,11 @@ public class Simulator {
     }
     
     public static Simulator createSimulatorUsingLog4j2(int numberOfNodes) {
-        return new Simulator(numberOfNodes,"sim4da", true, true, true, null);
+        return new Simulator(numberOfNodes, "sim4da", true, true, true, null);
     }
     
     public void attachNode(int id, Node node) {
-        if (id>=0 && id<numberOfNodes) nodes[id]=node;
+        if (id>=0 && id<nodes.length) nodes[id]=node;
     }
     
     public void runSimulation(int duration) throws InstantiationException {
@@ -36,7 +34,7 @@ public class Simulator {
             node.setNetwork(network);
             node.setTracer(tracer);
         }
-        tracer.emit("Simulator::runSimulation with %d nodes for %d seconds", numberOfNodes, duration);
+        tracer.emit("Simulator::runSimulation with %d nodes for %d seconds", nodes.length, duration);
         for (Node node : nodes) {
             node.start();
         }

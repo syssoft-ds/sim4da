@@ -31,7 +31,7 @@ public abstract class Node {
         thread.start();
     }
     
-    public void stop () {
+    public void stop() {
         stop = true;
         messageQueue.stop(); // Stop waiting in receive
         try {
