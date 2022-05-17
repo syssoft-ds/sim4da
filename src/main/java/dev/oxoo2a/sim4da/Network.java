@@ -45,17 +45,4 @@ public class Network {
             nodes[i].putInMessageQueue(raw);
         }
     }
-    
-    public Message receive(int receiverId) {
-        if (receiverId<0 || receiverId>=nodes.length) {
-            System.err.printf("Network::receive: unknown receiver id %d\n", receiverId);
-            return null;
-        }
-        Message m = nodes[receiverId].awaitFromMessageQueue();
-        if (m!=null) {
-            String messageTypeString = m.type==MessageType.BROADCAST ? "Broadcast" : "Unicast";
-            tracer.emit("Receive %s:%d<-%d", messageTypeString, m.receiverId, m.senderId);
-        }
-        return m;
-    }
 }

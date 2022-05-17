@@ -4,6 +4,8 @@ import java.util.LinkedList;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
 
+import dev.oxoo2a.sim4da.Message.MessageType;
+
 public abstract class Node {
     
     private static final Random RANDOM = new Random();
@@ -64,17 +66,17 @@ public abstract class Node {
     }
     
     protected Message receive() {
-        return network.receive(id);
+        Message m = messageQueue.await();
+        if (m!=null) {
+            String messageTypeString = m.type==MessageType.BROADCAST ? "Broadcast" : "Unicast";
+            tracer.emit("Receive %s:%d<-%d", messageTypeString, m.receiverId, m.senderId);
+        }
+        return m;
     }
     
-    // The two methods below are package-private because they shouldn't be used by application code
-    
+    // package-private because this shouldn't be used by application code
     void putInMessageQueue(Message message) {
         messageQueue.put(message);
-    }
-    
-    Message awaitFromMessageQueue() {
-        return messageQueue.await();
     }
     
     // Module implements basic node functionality
