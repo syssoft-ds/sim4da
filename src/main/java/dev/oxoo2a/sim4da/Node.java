@@ -61,7 +61,7 @@ public abstract class Node {
         network.broadcast(myId, messageContent.toJson());
     }
     
-    protected Network.Message receive() {
+    protected Message receive() {
         return network.receive(myId);
     }
     

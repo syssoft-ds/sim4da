@@ -4,6 +4,8 @@ import java.util.LinkedList;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
 
+import dev.oxoo2a.sim4da.Message.MessageType;
+
 public class Network {
     
     private static final Random RANDOM = new Random();
@@ -72,24 +74,6 @@ public class Network {
             queue.stop();
     }
     
-    public static class Message {
-        public int senderId;
-        public int receiverId;
-        public MessageType type;
-        public String payload;
-        public Message(int senderId, int receiverId, MessageType type, String payload) {
-            this.senderId = senderId;
-            this.receiverId = receiverId;
-            this.type = type;
-            this.payload = payload;
-        }
-        @Override
-        public String toString() {
-            return  "Network::Message(sender="+senderId+",receiver="+receiverId+","
-                    +(type==MessageType.BROADCAST ? "Broadcast" : "Unicast")+",payload=<"+payload+">)";
-        }
-    }
-    
     private static class MessageQueue {
         private final LinkedList<Message> queue = new LinkedList<>();
         private final Semaphore awaitMessage = new Semaphore(0);
@@ -121,9 +105,5 @@ public class Network {
             stop = true;
             awaitMessage.release();
         }
-    }
-    
-    public enum MessageType {
-        UNICAST, BROADCAST
     }
 }

@@ -21,7 +21,7 @@ public class BroadcastNode extends Node {
         int broadcasts_received = 0;
         int broadcasts_sent = 0;
         while (stillSimulating()) {
-            Network.Message m_raw = receive();
+            Message m_raw = receive();
             if (m_raw == null) break; // Null == Simulation time ends while waiting for a message
             broadcasts_received++;
             // The following printf shows the elements of Network.Message except the message type unicast or broadcast
