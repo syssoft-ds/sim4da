@@ -45,20 +45,20 @@ public abstract class Node {
         return !stop;
     }
     
-    protected void sendUnicast(int receiverId, String m) {
-        network.unicast(myId, receiverId, m);
+    protected void sendUnicast(int receiverId, String messageContent) {
+        network.unicast(myId, receiverId, messageContent);
     }
     
-    protected void sendUnicast(int receiverId, Message m) {
-        network.unicast(myId, receiverId, m.toJson());
+    protected void sendUnicast(int receiverId, JsonSerializableMap messageContent) {
+        network.unicast(myId, receiverId, messageContent.toJson());
     }
     
-    protected void sendBroadcast(String m) {
-        network.broadcast(myId, m);
+    protected void sendBroadcast(String messageContent) {
+        network.broadcast(myId, messageContent);
     }
     
-    protected void sendBroadcast(Message message) {
-        network.broadcast(myId, message.toJson());
+    protected void sendBroadcast(JsonSerializableMap messageContent) {
+        network.broadcast(myId, messageContent.toJson());
     }
     
     protected Network.Message receive() {
