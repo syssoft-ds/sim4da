@@ -12,7 +12,7 @@ public abstract class Node {
     
     protected final int id;
     private final MessageQueue messageQueue = new MessageQueue();
-    private Network network;
+    private Simulator simulator;
     private Tracer tracer;
     private final Thread thread = new Thread(this::run);
     private boolean stop = false;
@@ -21,8 +21,8 @@ public abstract class Node {
         this.id = id;
     }
     
-    public void setNetwork(Network network) {
-        this.network = network;
+    public void setSimulator(Simulator simulator) {
+        this.simulator = simulator;
     }
     
     public void setTracer(Tracer tracer) {
@@ -42,7 +42,7 @@ public abstract class Node {
     }
     
     protected int getNumberOfNodes() {
-        return network.getNumberOfNodes();
+        return simulator.getNumberOfNodes();
     }
     
     protected boolean stillSimulating() {
@@ -50,19 +50,19 @@ public abstract class Node {
     }
     
     protected void sendUnicast(int receiverId, String messageContent) {
-        network.unicast(id, receiverId, messageContent);
+        simulator.unicast(id, receiverId, messageContent);
     }
     
     protected void sendUnicast(int receiverId, JsonSerializableMap messageContent) {
-        network.unicast(id, receiverId, messageContent.toJson());
+        simulator.unicast(id, receiverId, messageContent.toJson());
     }
     
     protected void sendBroadcast(String messageContent) {
-        network.broadcast(id, messageContent);
+        simulator.broadcast(id, messageContent);
     }
     
     protected void sendBroadcast(JsonSerializableMap messageContent) {
-        network.broadcast(id, messageContent.toJson());
+        simulator.broadcast(id, messageContent.toJson());
     }
     
     protected Message receive() {
