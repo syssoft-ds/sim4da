@@ -8,13 +8,10 @@ import dev.oxoo2a.sim4da.Message.MessageType;
 
 public abstract class Node {
     
-    private static final Random RANDOM = new Random();
-    
     protected final int id;
     private final MessageQueue messageQueue = new MessageQueue();
     private final Simulator simulator;
     private final Thread thread = new Thread(this::run);
-    private boolean stop = false;
     
     public Node(Simulator simulator, int id) {
         this.simulator = simulator;
@@ -26,7 +23,6 @@ public abstract class Node {
     }
     
     public void stop() {
-        stop = true;
         messageQueue.stop(); // Stop waiting in receive
         try {
             thread.join();
@@ -37,24 +33,28 @@ public abstract class Node {
         return simulator.getNumberOfNodes();
     }
     
-    protected boolean stillSimulating() {
-        return !stop;
+    protected Random getRandom() {
+        return simulator.getRandom();
+    }
+    
+    protected boolean isStillSimulating() {
+        return simulator.isStillSimulating();
     }
     
     protected void sendUnicast(int receiverId, String messageContent) {
-        simulator.unicast(id, receiverId, messageContent);
+        simulator.sendUnicast(id, receiverId, messageContent);
     }
     
     protected void sendUnicast(int receiverId, JsonSerializableMap messageContent) {
-        simulator.unicast(id, receiverId, messageContent.toJson());
+        simulator.sendUnicast(id, receiverId, messageContent.toJson());
     }
     
     protected void sendBroadcast(String messageContent) {
-        simulator.broadcast(id, messageContent);
+        simulator.sendBroadcast(id, messageContent);
     }
     
     protected void sendBroadcast(JsonSerializableMap messageContent) {
-        simulator.broadcast(id, messageContent.toJson());
+        simulator.sendBroadcast(id, messageContent.toJson());
     }
     
     protected Message receive() {
@@ -74,10 +74,9 @@ public abstract class Node {
     // Module implements basic node functionality
     protected abstract void run();
     
-    private static class MessageQueue {
+    private class MessageQueue {
         private final LinkedList<Message> queue = new LinkedList<>();
         private final Semaphore awaitMessage = new Semaphore(0);
-        private boolean stop = false;
         private void put(Message message) {
             synchronized (queue) {
                 queue.addLast(message);
@@ -85,15 +84,14 @@ public abstract class Node {
             }
         }
         private Message await() {
-            while (!stop) {
+            while (isStillSimulating()) {
                 try {
                     awaitMessage.acquire();
                     synchronized (queue) {
                         if (!queue.isEmpty()) {
                             // Return a random message in queue avoiding FIFO order
-                            if (queue.size() == 1)
-                                return queue.removeFirst();
-                            int c = RANDOM.nextInt(queue.size());
+                            if (queue.size()==1) return queue.removeFirst();
+                            int c = getRandom().nextInt(queue.size());
                             return queue.remove(c);
                         }
                     }
@@ -101,8 +99,7 @@ public abstract class Node {
             }
             return null; // Simulation time ended before a message was received
         }
-        public void stop() {
-            stop = true;
+        private void stop() {
             awaitMessage.release();
         }
     }

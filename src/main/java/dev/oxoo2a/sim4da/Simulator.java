@@ -1,20 +1,23 @@
 package dev.oxoo2a.sim4da;
 
 import java.io.PrintStream;
+import java.util.Random;
 
 import dev.oxoo2a.sim4da.Message.MessageType;
 
 public class Simulator {
     
-    private final Tracer tracer;
+    private final Random random = new Random();
     private final Node[] nodes;
+    private final Tracer tracer;
+    private boolean stillSimulating = true;
     
-    public Simulator(int numberOfNodes, String name, boolean ordered, boolean useLog4j2,
-                     PrintStream alternativeDestination) {
-        if (useLog4j2 || alternativeDestination!=null)
-            tracer = new Tracer(name, ordered, useLog4j2, alternativeDestination);
-        else tracer = null; //no tracing
+    public Simulator(int numberOfNodes, String name, boolean orderedTracing, boolean useLog4j2,
+                     PrintStream alternativeTracingDestination) {
         nodes = new Node[numberOfNodes];
+        if (useLog4j2 || alternativeTracingDestination!=null)
+            tracer = new Tracer(name, orderedTracing, useLog4j2, alternativeTracingDestination);
+        else tracer = null; //no tracing
     }
     
     public static Simulator createDefaultSimulator(int numberOfNodes) {
@@ -41,6 +44,7 @@ public class Simulator {
         try {
             Thread.sleep(duration * 1000L); // Wait for the required duration
         } catch (InterruptedException ignored) {}
+        stillSimulating=false;
         for (Node node : nodes) { // Tell all nodes to stop and wait for the threads to terminate
             node.stop();
         }
@@ -51,13 +55,21 @@ public class Simulator {
         return nodes.length;
     }
     
-    public void unicast(int senderId, int receiverId, String message) {
+    public Random getRandom() {
+        return random;
+    }
+    
+    public boolean isStillSimulating() {
+        return stillSimulating;
+    }
+    
+    public void sendUnicast(int senderId, int receiverId, String message) {
         if (receiverId<0 || receiverId>=nodes.length) {
-            System.err.printf("Network::unicast: unknown receiver id %d\n", receiverId);
+            System.err.printf("Simulator::sendUnicast: unknown receiverId %d\n", receiverId);
             return;
         }
         if (senderId<0 || senderId>=nodes.length) {
-            System.err.printf("Network::unicast: unknown sender id %d\n", senderId);
+            System.err.printf("Simulator::sendUnicast: unknown senderId %d\n", senderId);
             return;
         }
         emitToTracer("Unicast:%d->%d", senderId, receiverId);
@@ -65,9 +77,9 @@ public class Simulator {
         nodes[receiverId].putInMessageQueue(raw);
     }
     
-    public void broadcast(int senderId, String message) {
+    public void sendBroadcast(int senderId, String message) {
         if (senderId<0 || senderId>=nodes.length) {
-            System.err.printf("Network::broadcast: unknown sender id %d\n", senderId);
+            System.err.printf("Simulator::sendBroadcast: unknown senderId %d\n", senderId);
             return;
         }
         emitToTracer("Broadcast:%d->0..%d", senderId, nodes.length-1);
