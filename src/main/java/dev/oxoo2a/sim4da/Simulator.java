@@ -13,8 +13,8 @@ public class Simulator {
                      PrintStream alternativeDestination) {
         this.numberOfNodes = numberOfNodes;
         tracer = new Tracer(name, ordered, enableTracing, useLog4j2, alternativeDestination);
-        network = new Network(numberOfNodes, tracer);
         nodes = new Node[numberOfNodes];
+        network = new Network(numberOfNodes, nodes, tracer);
     }
     
     public static Simulator createDefaultSimulator(int numberOfNodes) {
@@ -43,7 +43,6 @@ public class Simulator {
         try {
             Thread.sleep(duration * 1000L); // Wait for the required duration
         } catch (InterruptedException ignored) {}
-        network.stop(); // Stop network - release nodes waiting in receive ...
         for (Node node : nodes) { // Tell all nodes to stop and wait for the threads to terminate
             node.stop();
         }
