@@ -32,7 +32,7 @@ public class Message {
     
     @Override
     public String toString() {
-        return "Network::Message(sender="+senderId+",receiver="+receiverId+","
+        return "Message(sender="+senderId+",receiver="+receiverId+","
                 +(type==MessageType.BROADCAST ? "Broadcast" : "Unicast")+",payload=<"+payload+">)";
     }
     
