@@ -10,6 +10,7 @@ public class SimulatorTest {
     
     @Test
     public void simpleSimulation() {
+        Assertions.assertTrue(numberOfNodes == 3);
         Simulator s = Simulator.createDefaultSimulator(numberOfNodes);
         for (int id = 0; id<numberOfNodes; id++) {
             Node n = new BroadcastNode(s, id);

@@ -8,7 +8,7 @@ import java.io.PrintStream;
 public class Tracer {
     
     @SuppressWarnings({"unused", "FieldCanBeLocal"})
-    private final String name; //currently unused
+    private final String name;
     @SuppressWarnings({"unused", "FieldCanBeLocal"})
     private final boolean orderedTracing; //currently unused
     private final boolean useLog4j2;
