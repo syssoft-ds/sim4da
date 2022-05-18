@@ -23,11 +23,11 @@ public class ValidateMessageCopies {
             while (isStillSimulating()) {
                 Message message = receive();
                 if (message==null) break; // Null == Simulation time ends while waiting for a message
-                Assertions.assertTrue(message.receiverId == id+1);
-                Assertions.assertTrue(message.type == MessageType.BROADCAST);
-                m = JsonSerializableMap.fromJson(message.payload);
+                Assertions.assertTrue(message.getReceiverId() == id+1);
+                Assertions.assertTrue(message.getType() == MessageType.BROADCAST);
+                m = JsonSerializableMap.fromJson(message.getPayload());
                 int sender_id = Integer.parseInt(m.get("Sender"));
-                Assertions.assertTrue(sender_id == message.senderId);
+                Assertions.assertTrue(sender_id == message.getSenderId());
                 m.put("Sender",String.valueOf(id));
                 m.put("Candidate", Integer.toString((id+1) % getNumberOfNodes()));
                 sendBroadcast(m);
