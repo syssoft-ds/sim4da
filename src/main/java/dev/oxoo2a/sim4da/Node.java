@@ -11,6 +11,7 @@ public abstract class Node implements Runnable {
     private final MessageQueue messageQueue = new MessageQueue();
     private final Simulator simulator;
     private final Thread thread = new Thread(this);
+    private final Random random = new Random();
     
     public Node(Simulator simulator, int id) {
         this.simulator = simulator;
@@ -30,10 +31,6 @@ public abstract class Node implements Runnable {
     
     protected int getNumberOfNodes() {
         return simulator.getNumberOfNodes();
-    }
-    
-    protected Random getRandom() {
-        return simulator.getRandom();
     }
     
     protected boolean isStillSimulating() {
@@ -93,7 +90,7 @@ public abstract class Node implements Runnable {
             private final int priority;
             private MessageWithPriority(Message message) {
                 this.message = message;
-                this.priority = getRandom().nextInt(100); //limit range to avoid int overflows when comparing
+                this.priority = random.nextInt(100); //limit range to avoid int overflows when comparing
             }
             @Override
             public int compareTo(MessageWithPriority other) {

@@ -1,13 +1,11 @@
 package dev.oxoo2a.sim4da;
 
 import java.io.PrintStream;
-import java.util.Random;
 
 import dev.oxoo2a.sim4da.Message.MessageType;
 
 public class Simulator {
     
-    private final Random random = new Random();
     private final Node[] nodes;
     private final Tracer tracer;
     
@@ -61,10 +59,6 @@ public class Simulator {
     
     public int getNumberOfNodes() {
         return nodes.length;
-    }
-    
-    public Random getRandom() {
-        return random;
     }
     
     public boolean isStillSimulating() {

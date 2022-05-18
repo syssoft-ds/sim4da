@@ -1,5 +1,7 @@
 package dev.oxoo2a.sim4da;
 
+import java.util.Random;
+
 public class BroadcastNode extends Node {
     
     public BroadcastNode(Simulator simulator, int id) {
@@ -8,11 +10,12 @@ public class BroadcastNode extends Node {
     
     @Override
     public void run() {
+        Random r = new Random();
         // System.out.printf("This is node %d\n", id);
         // Create a message with a random candidate to send the next broadcast
         JsonSerializableMap broadcastContent = new JsonSerializableMap();
         broadcastContent.put("Sender", String.valueOf(id));
-        broadcastContent.put("Candidate", String.valueOf(getRandom().nextInt(getNumberOfNodes())));
+        broadcastContent.put("Candidate", String.valueOf(r.nextInt(getNumberOfNodes())));
         sendBroadcast(broadcastContent);
         int broadcastsReceived = 0;
         int broadcastsSent = 0;
@@ -27,9 +30,9 @@ public class BroadcastNode extends Node {
             int c = Integer.parseInt(receivedContent.get("Candidate"));
             // Who's the next candidate for sending a broadcast message. There's also a small probability, that we
             // send a broadcast message anyway :-)
-            if (c==id || getRandom().nextInt(100)<5) {
+            if (c==id || r.nextInt(100)<5) {
                 // The next sender for a broadcast message is selected randomly
-                broadcastContent.put("Candidate", String.valueOf(getRandom().nextInt(getNumberOfNodes())));
+                broadcastContent.put("Candidate", String.valueOf(r.nextInt(getNumberOfNodes())));
                 sendBroadcast(broadcastContent);
                 broadcastsSent++;
             }
