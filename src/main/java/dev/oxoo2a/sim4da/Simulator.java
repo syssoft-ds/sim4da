@@ -10,7 +10,10 @@ public class Simulator {
     private final Random random = new Random();
     private final Node[] nodes;
     private final Tracer tracer;
-    private boolean stillSimulating = true;
+    
+    // This is only changed to false once in the main thread, but still needs to be volatile
+    // to ensure that all Node threads can actually see that change.
+    private volatile boolean stillSimulating = true;
     
     public Simulator(int numberOfNodes, String name, boolean orderedTracing, boolean useLog4j2,
                      PrintStream alternativeTracingDestination) {
@@ -47,7 +50,7 @@ public class Simulator {
             node.start();
         }
         try {
-            Thread.sleep(duration * 1000L); // Wait for the required duration
+            Thread.sleep(duration*1000L); // Wait for the required duration
         } catch (InterruptedException ignored) {}
         stillSimulating=false;
         for (Node node : nodes) { // Tell all nodes to stop and wait for the threads to terminate
