@@ -93,11 +93,8 @@ public class Simulator {
         emitToTracer("Broadcast:%d->0..%d", senderId, nodes.length-1);
         Message raw = new Message(senderId, -1, MessageType.BROADCAST, message);
         for (int i = 0; i<nodes.length; i++) {
-            if (i==senderId) continue;
-            raw.receiverId = i; //TODO This is most probably not correct.
-                                // Since there is only a single Message object whose receiverId is overwritten
-                                // i times, all nodes will see receiverId==i-1 after the loop.
-            nodes[i].putInMessageQueue(raw);
+            if (i==senderId) continue; //don't send broadcast back to sender
+            nodes[i].putInMessageQueue(new Message(raw.getSenderId(), i, raw.getType(), raw.getPayload()));
         }
     }
     

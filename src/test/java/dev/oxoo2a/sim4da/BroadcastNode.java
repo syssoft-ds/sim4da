@@ -23,7 +23,7 @@ public class BroadcastNode extends Node {
             // The following printf shows the elements of Message except the message type (unicast or broadcast)
             // System.out.printf("%d: from %d, payload=<%s>\n", id, message.senderId, message.payload);
             // JSON encoded messages must be deserialized into a Message object
-            JsonSerializableMap receivedContent = JsonSerializableMap.fromJson(message.payload);
+            JsonSerializableMap receivedContent = JsonSerializableMap.fromJson(message.getPayload());
             int c = Integer.parseInt(receivedContent.get("Candidate"));
             // Who's the next candidate for sending a broadcast message. There's also a small probability, that we
             // send a broadcast message anyway :-)

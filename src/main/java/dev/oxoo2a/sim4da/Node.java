@@ -59,8 +59,8 @@ public abstract class Node implements Runnable {
     protected Message receive() {
         Message m = messageQueue.await();
         if (m!=null) {
-            String messageTypeString = m.type==MessageType.BROADCAST ? "Broadcast" : "Unicast";
-            simulator.emitToTracer("Receive %s:%d<-%d", messageTypeString, m.receiverId, m.senderId);
+            String messageTypeString = m.getType()==MessageType.BROADCAST ? "Broadcast" : "Unicast";
+            simulator.emitToTracer("Receive %s:%d<-%d", messageTypeString, m.getReceiverId(), m.getSenderId());
         }
         return m;
     }
