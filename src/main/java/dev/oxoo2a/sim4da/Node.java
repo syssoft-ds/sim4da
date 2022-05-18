@@ -1,70 +1,104 @@
 package dev.oxoo2a.sim4da;
 
-public abstract class Node {
+import java.util.Random;
+import java.util.concurrent.PriorityBlockingQueue;
 
-    public Node ( int my_id ) {
-        this.myId = my_id;
-        stop = false;
-        t_main = new Thread(this::main);
-    }
+import dev.oxoo2a.sim4da.Message.MessageType;
 
-    public void setNetwork ( Network network ) {
-        this.network = network;
+public abstract class Node implements Runnable {
+    
+    protected final int id;
+    private final MessageQueue messageQueue = new MessageQueue();
+    private final Simulator simulator;
+    private final Thread thread = new Thread(this);
+    
+    public Node(Simulator simulator, int id) {
+        this.simulator = simulator;
+        this.id = id;
     }
-
-    public void setTracer ( Tracer tracer ) {
-        this.tracer = tracer;
+    
+    public void start() {
+        thread.start();
     }
-
-    public void start () {
-        t_main.start();
-    }
-    private void sleep ( long millis ) {
+    
+    public void stop() {
+        thread.interrupt(); // Stop waiting in receive
         try {
-            Thread.sleep(millis);
+            thread.join();
+        } catch (InterruptedException ignored) {}
+    }
+    
+    protected int getNumberOfNodes() {
+        return simulator.getNumberOfNodes();
+    }
+    
+    protected Random getRandom() {
+        return simulator.getRandom();
+    }
+    
+    protected boolean isStillSimulating() {
+        return simulator.isStillSimulating();
+    }
+    
+    protected void sendUnicast(int receiverId, String messageContent) {
+        simulator.sendUnicast(id, receiverId, messageContent);
+    }
+    
+    protected void sendUnicast(int receiverId, JsonSerializableMap messageContent) {
+        simulator.sendUnicast(id, receiverId, messageContent.toJson());
+    }
+    
+    protected void sendBroadcast(String messageContent) {
+        simulator.sendBroadcast(id, messageContent);
+    }
+    
+    protected void sendBroadcast(JsonSerializableMap messageContent) {
+        simulator.sendBroadcast(id, messageContent.toJson());
+    }
+    
+    protected Message receive() {
+        Message m = messageQueue.await();
+        if (m!=null) {
+            String messageTypeString = m.type==MessageType.BROADCAST ? "Broadcast" : "Unicast";
+            simulator.emitToTracer("Receive %s:%d<-%d", messageTypeString, m.receiverId, m.senderId);
         }
-        catch (InterruptedException e) {};
+        return m;
     }
-
-    protected int numberOfNodes() { return network.numberOfNodes(); };
-
-    protected boolean stillSimulating () {
-        return !stop;
+    
+    // package-private because this shouldn't be used by application code
+    void putInMessageQueue(Message message) {
+        messageQueue.put(message);
     }
-    protected void sendUnicast ( int receiver_id, String m ) {
-        network.unicast(myId,receiver_id,m);
-    }
-
-    protected void sendUnicast ( int receiver_id, Message m ) {
-        network.unicast(myId,receiver_id, m.toJson());
-    }
-
-    protected void sendBroadcast ( String m ) {
-        network.broadcast(myId,m);
-    }
-
-    protected void sendBroadcast ( Message m ) {
-        network.broadcast(myId,m.toJson());
-    }
-
-    protected Network.Message receive () {
-        return network.receive(myId);
-    }
-
-    // Module implements basic node functionality
-    protected abstract void main ();
-
-    public void stop () {
-        stop = true;
-        try {
-            t_main.join();
+    
+    // Class implements only basic node functionality
+    @Override
+    public abstract void run();
+    
+    private class MessageQueue {
+        // To avoid reading all messages in FIFO order (which is not guaranteed in a real network)
+        // we order them according to a random but fixed priority.
+        // All BlockingQueue implementations are thread-safe, so no external synchronization is required.
+        private final PriorityBlockingQueue<MessageWithPriority> queue = new PriorityBlockingQueue<>();
+        private void put(Message message) {
+            queue.put(new MessageWithPriority(message));
         }
-        catch (InterruptedException ignored) {};
+        private Message await() {
+            try {
+                return queue.take().message;
+            } catch (InterruptedException ignored) {}
+            return null; // Simulation time ended before a message was received
+        }
+        private class MessageWithPriority implements Comparable<MessageWithPriority> {
+            private final Message message;
+            private final int priority;
+            private MessageWithPriority(Message message) {
+                this.message = message;
+                this.priority = getRandom().nextInt(100); //limit range to avoid int overflows when comparing
+            }
+            @Override
+            public int compareTo(MessageWithPriority other) {
+                return priority-other.priority;
+            }
+        }
     }
-
-    protected final int myId;
-    private Network network;
-    private Tracer tracer;
-    private final Thread t_main;
-    private boolean stop;
 }
