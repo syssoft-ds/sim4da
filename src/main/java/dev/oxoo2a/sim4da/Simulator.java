@@ -74,7 +74,7 @@ public class Simulator {
             System.err.printf("Simulator::sendUnicast: unknown senderId %d\n", senderId);
             return;
         }
-        emitToTracer("Unicast:%d->%d", senderId, receiverId);
+        emitToTracer("Send Unicast:%d->%d", senderId, receiverId);
         Message raw = new Message(senderId, receiverId, MessageType.UNICAST, message);
         nodes[receiverId].putInMessageQueue(raw);
     }
@@ -84,11 +84,10 @@ public class Simulator {
             System.err.printf("Simulator::sendBroadcast: unknown senderId %d\n", senderId);
             return;
         }
-        emitToTracer("Broadcast:%d->0..%d", senderId, nodes.length-1);
-        Message raw = new Message(senderId, -1, MessageType.BROADCAST, message);
+        emitToTracer("Send Broadcast:%d->0..%d", senderId, nodes.length-1);
         for (int i = 0; i<nodes.length; i++) {
             if (i==senderId) continue; //don't send broadcast back to sender
-            nodes[i].putInMessageQueue(new Message(raw.getSenderId(), i, raw.getType(), raw.getPayload()));
+            nodes[i].putInMessageQueue(new Message(senderId, i, MessageType.BROADCAST, message));
         }
     }
     
