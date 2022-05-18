@@ -1,16 +1,17 @@
 package dev.oxoo2a.sim4da;
 
 import java.io.PrintStream;
-import java.util.Random;
 
 import dev.oxoo2a.sim4da.Message.MessageType;
 
 public class Simulator {
     
-    private final Random random = new Random();
     private final Node[] nodes;
     private final Tracer tracer;
-    private boolean stillSimulating = true;
+    
+    // This is only changed to false once in the main thread, but still needs to be volatile
+    // to ensure that all Node threads can actually see that change.
+    private volatile boolean stillSimulating = true;
     
     public Simulator(int numberOfNodes, String name, boolean orderedTracing, boolean useLog4j2,
                      PrintStream alternativeTracingDestination) {
@@ -47,7 +48,7 @@ public class Simulator {
             node.start();
         }
         try {
-            Thread.sleep(duration * 1000L); // Wait for the required duration
+            Thread.sleep(duration*1000L); // Wait for the required duration
         } catch (InterruptedException ignored) {}
         stillSimulating=false;
         for (Node node : nodes) { // Tell all nodes to stop and wait for the threads to terminate
@@ -58,10 +59,6 @@ public class Simulator {
     
     public int getNumberOfNodes() {
         return nodes.length;
-    }
-    
-    public Random getRandom() {
-        return random;
     }
     
     public boolean isStillSimulating() {
@@ -90,11 +87,8 @@ public class Simulator {
         emitToTracer("Broadcast:%d->0..%d", senderId, nodes.length-1);
         Message raw = new Message(senderId, -1, MessageType.BROADCAST, message);
         for (int i = 0; i<nodes.length; i++) {
-            if (i==senderId) continue;
-            raw.receiverId = i; //TODO This is most probably not correct.
-                                // Since there is only a single Message object whose receiverId is overwritten
-                                // i times, all nodes will see receiverId==i-1 after the loop.
-            nodes[i].putInMessageQueue(raw);
+            if (i==senderId) continue; //don't send broadcast back to sender
+            nodes[i].putInMessageQueue(new Message(raw.getSenderId(), i, raw.getType(), raw.getPayload()));
         }
     }
     
