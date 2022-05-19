@@ -2,31 +2,35 @@ package dev.oxoo2a.sim4da;
 
 import java.io.PrintStream;
 
+import dev.oxoo2a.sim4da.LogicalTimestamp.ExtendedLamportTimestamp;
+import dev.oxoo2a.sim4da.LogicalTimestamp.VectorTimestamp;
 import dev.oxoo2a.sim4da.Message.MessageType;
 
 public class Simulator {
     
     private final Node[] nodes;
     private final Tracer tracer;
+    private final TimestampType timestampType;
     
     // This is only changed to false once in the main thread, but still needs to be volatile
     // to ensure that all Node threads can actually see that change.
     private volatile boolean stillSimulating = true;
     
-    public Simulator(int numberOfNodes, String name, boolean orderedTracing, boolean useLog4j2,
-                     PrintStream alternativeTracingDestination) {
+    public Simulator(int numberOfNodes, TimestampType timestampType, String name,
+                     boolean orderedTracing, boolean useLog4j2, PrintStream alternativeTracingDestination) {
         nodes = new Node[numberOfNodes];
         if (useLog4j2 || alternativeTracingDestination!=null)
             tracer = new Tracer(name, orderedTracing, useLog4j2, alternativeTracingDestination);
         else tracer = null; //no tracing
+        this.timestampType = timestampType;
     }
     
     public static Simulator createDefaultSimulator(int numberOfNodes) {
-        return new Simulator(numberOfNodes, "sim4da", true, true, System.out);
+        return new Simulator(numberOfNodes, TimestampType.EXTENDED_LAMPORT, "sim4da", true, true, System.out);
     }
     
     public static Simulator createSimulatorUsingLog4j2(int numberOfNodes) {
-        return new Simulator(numberOfNodes, "sim4da", true, true, null);
+        return new Simulator(numberOfNodes, TimestampType.EXTENDED_LAMPORT, "sim4da", true, true, null);
     }
     
     public void attachNode(Node node) throws IllegalArgumentException {
@@ -65,7 +69,7 @@ public class Simulator {
         return stillSimulating;
     }
     
-    public void sendUnicast(int senderId, int receiverId, String message) {
+    public void sendUnicast(int senderId, int receiverId, LogicalTimestamp timestamp, String payload) {
         if (receiverId<0 || receiverId>=nodes.length) {
             System.err.printf("Simulator::sendUnicast: unknown receiverId %d\n", receiverId);
             return;
@@ -75,24 +79,41 @@ public class Simulator {
             return;
         }
         emitToTracer("Unicast:%d->%d", senderId, receiverId);
-        Message raw = new Message(senderId, receiverId, MessageType.UNICAST, message);
+        Message raw = new Message(senderId, receiverId, MessageType.UNICAST, timestamp, payload);
         nodes[receiverId].putInMessageQueue(raw);
     }
     
-    public void sendBroadcast(int senderId, String message) {
+    public void sendBroadcast(int senderId, LogicalTimestamp timestamp, String payload) {
         if (senderId<0 || senderId>=nodes.length) {
             System.err.printf("Simulator::sendBroadcast: unknown senderId %d\n", senderId);
             return;
         }
         emitToTracer("Broadcast:%d->0..%d", senderId, nodes.length-1);
-        Message raw = new Message(senderId, -1, MessageType.BROADCAST, message);
+        Message raw = new Message(senderId, -1, MessageType.BROADCAST, timestamp, payload);
         for (int i = 0; i<nodes.length; i++) {
             if (i==senderId) continue; //don't send broadcast back to sender
-            nodes[i].putInMessageQueue(new Message(raw.getSenderId(), i, raw.getType(), raw.getPayload()));
+            nodes[i].putInMessageQueue(new Message(raw.getSenderId(), i, raw.getType(),
+                    raw.getTimestamp(), raw.getPayload()));
         }
     }
     
     public void emitToTracer(String format, Object... args) {
         if (tracer!=null) tracer.emit(format, args);
+    }
+    
+    LogicalTimestamp getInitialTimestamp(int nodeId) {
+        switch (timestampType) {
+            case NONE:
+                return null;
+            case EXTENDED_LAMPORT:
+                return new ExtendedLamportTimestamp(nodeId, 0L);
+            case VECTOR:
+                return new VectorTimestamp(nodes.length, 0L);
+        }
+        return null; // don't use any timestamps during simulation
+    }
+    
+    public enum TimestampType {
+        NONE, EXTENDED_LAMPORT, VECTOR
     }
 }
