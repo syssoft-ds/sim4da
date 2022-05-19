@@ -41,7 +41,7 @@ public class BroadcastMessageCopiesTest {
                 Message message = receive();
                 if (message==null) {
                     Assertions.assertFalse(isStillSimulating());
-                    break; // Null == Simulation time ends while waiting for a message
+                    break; // null==simulation time ends while waiting for a message
                 }
                 Assertions.assertEquals(message.getReceiverId(), id);
                 Assertions.assertSame(message.getType(), MessageType.BROADCAST);

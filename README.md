@@ -37,6 +37,7 @@ Inside `run`, the following fields and methods are available:
 - `sendBroadcast(String messageContent)`: sends a raw string `messageContent` to all nodes (except the sender itself)
 - `sendBroadcast(JsonSerializableMap messageContent)`: sends a `HashMap`-like message encoded in JSON to all nodes (except the sender itself)
 - `receive()`: blocks until a message is received by the node or the simulation time has ended (in which case `null` is returned). Otherwise, returns an object of type `Message`, which stores `senderId`, `receiverId`, `type` (unicast or broadcast) and the `payload` as a string. If a `JsonSerializableMap` is expected, this payload must be deserialized from JSON back into an object of type `JsonSerializableMap` by calling `JsonSerializableMap.fromJson(payload)`.
+- `emitToTracer(String format, Object... args)`: writes a line to the simulation tracer (usually a log file or the console) using a printf-like syntax
 
 An example implementation for a distributed algorithm simulation is available as a test case (`BroadcastNode.java` and `SimulatorTest.java`).
 

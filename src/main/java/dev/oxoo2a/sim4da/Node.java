@@ -81,6 +81,10 @@ public abstract class Node implements Runnable {
         return m;
     }
     
+    protected void emitToTracer(String format, Object... args) {
+        simulator.emitToTracer(format, args);
+    }
+    
     // package-private because this shouldn't be used by application code
     void putInMessageQueue(Message message) {
         messageQueue.put(message);
