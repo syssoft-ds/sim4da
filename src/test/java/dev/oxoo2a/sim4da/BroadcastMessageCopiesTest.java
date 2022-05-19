@@ -9,7 +9,7 @@ import dev.oxoo2a.sim4da.Message.MessageType;
 public class BroadcastMessageCopiesTest {
     
     private static final int numberOfNodes = 5;
-    private static final int duration = 10;
+    private static final int duration = 2;
     
     private static class TestNode extends Node {
         public TestNode(Simulator s, int id) {
@@ -35,8 +35,8 @@ public class BroadcastMessageCopiesTest {
                 int senderId = Integer.parseInt(m.get("Sender"));
                 Assertions.assertEquals(senderId, message.getSenderId());
                 int candidateId = Integer.parseInt(m.get("Candidate"));
-                Assertions.assertEquals(candidateId, message.getReceiverId());
                 if (candidateId==id) {
+                    Assertions.assertEquals(candidateId, message.getReceiverId());
                     m.put("Sender", String.valueOf(id));
                     m.put("Candidate", Integer.toString((id+1) % getNumberOfNodes()));
                     sendBroadcast(m);
