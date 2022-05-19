@@ -4,27 +4,27 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
 
-public class MessageTest {
+public class JsonSerializableMapTest {
     
     private static final JsonSerializableMap m = new JsonSerializableMap();
     
     @BeforeAll
-    public static void createMessage () {
+    public static void createMap() {
         m.put("a", "b");
         m.put("c", "d");
     }
     
     @Test
-    public void testMessageBasics () {
+    public void testMapBasics() {
         Assertions.assertEquals(m.get("a"), "b");
         Assertions.assertEquals(m.get("c"), "d");
         Assertions.assertNull(m.get("no_key"));
     }
     
     @Test
-    public void serializeAndDeserialize () {
-        String m_json = m.toJson();
-        JsonSerializableMap m2 = JsonSerializableMap.fromJson(m_json);
+    public void serializeAndDeserializeMap() {
+        String jsonString = m.toJson();
+        JsonSerializableMap m2 = JsonSerializableMap.fromJson(jsonString);
         Assertions.assertEquals(m2.get("a"), "b");
         Assertions.assertEquals(m2.get("c"), "d");
     }
