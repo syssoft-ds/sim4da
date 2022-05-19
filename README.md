@@ -29,11 +29,13 @@ Inside `run`, the following fields and methods are available:
 
 - `id`: the `id` of this node
 - `getNumberOfNodes()`: returns the total number of nodes in the simulator
+- `isStillSimulating()`: returns `true` while the duration for the simulation is not exceeded
+- `getLocalTimestamp()`: returns the current logical timestamp of this node. This is an object of a subclass of `LogicalTimestamp`, or `null` if no timestamp is available. Which exact type of timestamp is being used depends on the `timestampType` parameter of the simulator that this node belongs to
+- `incrementLocalTimestamp()`: increments the local clock/timestamp of this node by one, using a suitable implementation for the type of timestamp that is used in this simulation. This should be called by application code only when a local event happens, it is called automatically when sending or receiving a message
 - `sendUnicast(receiverId, String messageContent)`: sends a raw string `messageContent` to node `receiverId`
 - `sendUnicast(receiverId, JsonSerializableMap messageContent)`: sends a `HashMap`-like message encoded in JSON to node `receiverId`
 - `sendBroadcast(String messageContent)`: sends a raw string `messageContent` to all nodes (except the sender itself)
 - `sendBroadcast(JsonSerializableMap messageContent)`: sends a `HashMap`-like message encoded in JSON to all nodes (except the sender itself)
-- `isStillSimulating()`: returns `true` while the duration for the simulation is not exceeded
 - `receive()`: blocks until a message is received by the node or the simulation time has ended (in which case `null` is returned). Otherwise, returns an object of type `Message`, which stores `senderId`, `receiverId`, `type` (unicast or broadcast) and the `payload` as a string. If a `JsonSerializableMap` is expected, this payload must be deserialized from JSON back into an object of type `JsonSerializableMap` by calling `JsonSerializableMap.fromJson(payload)`.
 
 An example implementation for a distributed algorithm simulation is available as a test case (`BroadcastNode.java` and `SimulatorTest.java`).
