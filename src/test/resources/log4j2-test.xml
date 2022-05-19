@@ -10,6 +10,9 @@
         <File name="logfile_amc" fileName="sim4da-amc.log" append="false">
             <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
         </File>
+        <File name="logfile_LeLann" fileName="sim4da-LeLann.log" append="false">
+            <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </File>
     </Appenders>
     <Loggers>
         <Logger name="sim4da" level="trace" additivity="false">
@@ -17,6 +20,9 @@
         </Logger>
         <Logger name="amc" level="trace" additivity="false">
             <AppenderRef ref="logfile_amc"/>
+        </Logger>
+        <Logger name="LeLann" level="trace" additivity="false">
+            <AppenderRef ref="logfile_LeLann"/>
         </Logger>
         <Root level="warn">
             <AppenderRef ref="console"/>
