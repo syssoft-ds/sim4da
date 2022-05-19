@@ -8,11 +8,25 @@ import dev.oxoo2a.sim4da.Message.MessageType;
 
 public class BroadcastMessageCopiesTest {
     
-    private static final int numberOfNodes = 5;
-    private static final int duration = 2;
+    private static final int NUMBER_OF_NODES = 5;
+    private static final int DURATION = 2;
+    
+    @Test
+    public void areMessagesCopied () {
+        Simulator s = new Simulator(NUMBER_OF_NODES, TimestampType.EXTENDED_LAMPORT, "amc", true, true, System.out);
+        for (int id = 0; id<NUMBER_OF_NODES; id++) {
+            Node n = new TestNode(s, id);
+            s.attachNode(n);
+        }
+        try {
+            s.runSimulation(DURATION);
+        } catch (InstantiationException ignored) {
+            Assertions.fail("Not all nodes instantiated");
+        }
+    }
     
     private static class TestNode extends Node {
-        public TestNode(Simulator s, int id) {
+        private TestNode(Simulator s, int id) {
             super(s, id);
         }
         @Override
@@ -42,20 +56,6 @@ public class BroadcastMessageCopiesTest {
                     sendBroadcast(m);
                 }
             }
-        }
-    }
-    
-    @Test
-    public void areMessagesCopied () {
-        Simulator s = new Simulator(numberOfNodes, TimestampType.EXTENDED_LAMPORT, "amc", true, true, System.out);
-        for (int id = 0; id<numberOfNodes; id++) {
-            Node n = new TestNode(s, id);
-            s.attachNode(n);
-        }
-        try {
-            s.runSimulation(duration);
-        } catch (InstantiationException ignored) {
-            Assertions.fail("Not all nodes instantiated");
         }
     }
 }
