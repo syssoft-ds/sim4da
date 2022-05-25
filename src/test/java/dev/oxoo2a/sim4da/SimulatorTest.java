@@ -5,19 +5,19 @@ import org.junit.jupiter.api.Test;
 
 public class SimulatorTest {
     
-    private static final int numberOfNodes = 3;
-    private static final int duration = 2;
+    private static final int NUMBER_OF_NODES = 3;
+    private static final int DURATION = 2;
     
     @Test
     public void simpleSimulation() {
-        Assertions.assertTrue(numberOfNodes == 3);
-        Simulator s = Simulator.createDefaultSimulator(numberOfNodes);
-        for (int id = 0; id<numberOfNodes; id++) {
+        Assertions.assertEquals(NUMBER_OF_NODES, 3);
+        Simulator s = Simulator.createDefaultSimulator(NUMBER_OF_NODES);
+        for (int id = 0; id<NUMBER_OF_NODES; id++) {
             Node n = new BroadcastNode(s, id);
             s.attachNode(n);
         }
         try {
-            s.runSimulation(duration);
+            s.runSimulation(DURATION);
         } catch (InstantiationException ignored) {
             Assertions.fail("Not all nodes instantiated");
         }
@@ -25,9 +25,9 @@ public class SimulatorTest {
     
     @Test
     public void someNodesNotInstantiated () {
-        Simulator s = Simulator.createDefaultSimulator(numberOfNodes);
+        Simulator s = Simulator.createDefaultSimulator(NUMBER_OF_NODES);
         s.attachNode(new BroadcastNode(s, 0));
         s.attachNode(new BroadcastNode(s, 1));
-        Assertions.assertThrows(InstantiationException.class,() -> s.runSimulation(duration));
+        Assertions.assertThrows(InstantiationException.class,() -> s.runSimulation(DURATION));
     }
 }

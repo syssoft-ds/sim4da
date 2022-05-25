@@ -11,7 +11,7 @@ public class BroadcastNode extends Node {
     @Override
     public void run() {
         Random r = new Random();
-        // System.out.printf("This is node %d\n", id);
+        emitToTracer("This is node %d", id);
         // Create a message with a random candidate to send the next broadcast
         JsonSerializableMap broadcastContent = new JsonSerializableMap();
         broadcastContent.put("Sender", String.valueOf(id));
@@ -21,7 +21,7 @@ public class BroadcastNode extends Node {
         int broadcastsSent = 0;
         while (isStillSimulating()) {
             Message message = receive();
-            if (message==null) break; // Null == Simulation time ends while waiting for a message
+            if (message==null) break; // null==simulation time ends while waiting for a message
             broadcastsReceived++;
             // The following printf shows the elements of Message except the message type (unicast or broadcast)
             // System.out.printf("%d: from %d, payload=<%s>\n", id, message.senderId, message.payload);
@@ -37,7 +37,7 @@ public class BroadcastNode extends Node {
                 broadcastsSent++;
             }
         }
-        System.out.printf("%d: %d broadcasts received and %d broadcasts sent\n", id,
+        emitToTracer("Node %d: %d broadcasts received and %d broadcasts sent", id,
                 broadcastsReceived, broadcastsSent);
     }
 }

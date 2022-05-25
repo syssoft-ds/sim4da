@@ -5,12 +5,14 @@ public class Message {
     private final int senderId;
     private final int receiverId;
     private final MessageType type;
+    private final LogicalTimestamp timestamp;
     private final String payload;
     
-    public Message(int senderId, int receiverId, MessageType type, String payload) {
+    public Message(int senderId, int receiverId, MessageType type, LogicalTimestamp timestamp, String payload) {
         this.senderId = senderId;
         this.receiverId = receiverId;
         this.type = type;
+        this.timestamp = timestamp;
         this.payload = payload;
     }
     
@@ -26,6 +28,10 @@ public class Message {
         return type;
     }
     
+    public LogicalTimestamp getTimestamp() {
+        return timestamp;
+    }
+    
     public String getPayload() {
         return payload;
     }
@@ -33,7 +39,8 @@ public class Message {
     @Override
     public String toString() {
         return "Message(sender="+senderId+",receiver="+receiverId+","
-                +(type==MessageType.BROADCAST ? "Broadcast" : "Unicast")+",payload=<"+payload+">)";
+                +(type==MessageType.BROADCAST ? "Broadcast" : "Unicast")+",timestamp="+timestamp
+                +",payload=<"+payload+">)";
     }
     
     public enum MessageType {

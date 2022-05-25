@@ -13,9 +13,12 @@ public abstract class Node implements Runnable {
     private final Thread thread = new Thread(this);
     private final Random random = new Random();
     
+    private LogicalTimestamp localTimestamp;
+    
     public Node(Simulator simulator, int id) {
         this.simulator = simulator;
         this.id = id;
+        localTimestamp = simulator.getInitialTimestamp(id);
     }
     
     public void start() {
@@ -37,29 +40,49 @@ public abstract class Node implements Runnable {
         return simulator.isStillSimulating();
     }
     
+    public LogicalTimestamp getLocalTimestamp() {
+        return localTimestamp;
+    }
+    
+    // This should be called by application code whenever a local event happens
+    protected void incrementLocalTimestamp() {
+        if (localTimestamp!=null) localTimestamp = localTimestamp.getIncremented(id);
+    }
+    
     protected void sendUnicast(int receiverId, String messageContent) {
-        simulator.sendUnicast(id, receiverId, messageContent);
+        incrementLocalTimestamp(); // send-event
+        simulator.sendUnicast(id, receiverId, localTimestamp, messageContent);
     }
     
     protected void sendUnicast(int receiverId, JsonSerializableMap messageContent) {
-        simulator.sendUnicast(id, receiverId, messageContent.toJson());
+        incrementLocalTimestamp(); // send-event
+        simulator.sendUnicast(id, receiverId, localTimestamp, messageContent.toJson());
     }
     
     protected void sendBroadcast(String messageContent) {
-        simulator.sendBroadcast(id, messageContent);
+        incrementLocalTimestamp(); // send-event
+        simulator.sendBroadcast(id, localTimestamp, messageContent);
     }
     
     protected void sendBroadcast(JsonSerializableMap messageContent) {
-        simulator.sendBroadcast(id, messageContent.toJson());
+        incrementLocalTimestamp(); // send-event
+        simulator.sendBroadcast(id, localTimestamp, messageContent.toJson());
     }
     
     protected Message receive() {
         Message m = messageQueue.await();
         if (m!=null) {
+            incrementLocalTimestamp(); // receive-event
+            if (localTimestamp!=null && m.getTimestamp()!=null)
+                localTimestamp = localTimestamp.getAdjusted(m.getTimestamp()); // forward local clock if necessary
             String messageTypeString = m.getType()==MessageType.BROADCAST ? "Broadcast" : "Unicast";
             simulator.emitToTracer("Receive %s:%d<-%d", messageTypeString, m.getReceiverId(), m.getSenderId());
         }
         return m;
+    }
+    
+    protected void emitToTracer(String format, Object... args) {
+        simulator.emitToTracer(format, args);
     }
     
     // package-private because this shouldn't be used by application code
