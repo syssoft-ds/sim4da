@@ -21,11 +21,11 @@ public abstract class Node implements Runnable {
         localTimestamp = simulator.getInitialTimestamp(id);
     }
     
-    public void start() {
+    void start() {
         thread.start();
     }
     
-    public void stop() {
+    void stop() {
         thread.interrupt(); // Stop waiting in receive
         try {
             thread.join();
@@ -40,7 +40,7 @@ public abstract class Node implements Runnable {
         return simulator.isStillSimulating();
     }
     
-    public LogicalTimestamp getLocalTimestamp() {
+    protected LogicalTimestamp getLocalTimestamp() {
         return localTimestamp;
     }
     
