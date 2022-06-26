@@ -21,7 +21,8 @@ public class Tracer {
         this.orderedTracing = orderedTracing;
         this.useLog4j2 = useLog4j2;
         this.alternativeTracingDestination = alternativeTracingDestination;
-        log4j2Logger = LogManager.getFormatterLogger(name);
+        if (useLog4j2) log4j2Logger = LogManager.getFormatterLogger(name);
+        else log4j2Logger = null; //must initialize final fields
     }
     
     public void emit(String format, Object... args) {
