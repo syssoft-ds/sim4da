@@ -17,7 +17,7 @@ public class Simulator {
     // to ensure that all Node threads can actually see that change.
     private volatile boolean stillSimulating = true;
     
-    public Simulator(int numberOfNodes, TimestampType timestampType) { //without tracing
+    public Simulator(int numberOfNodes, TimestampType timestampType) { // without tracing
         this(numberOfNodes, timestampType, null, false, null, false);
     }
     
@@ -73,11 +73,11 @@ public class Simulator {
     
     public void sendUnicast(int senderId, int receiverId, LogicalTimestamp timestamp, String payload) {
         if (receiverId<0 || receiverId>=nodes.length) {
-            System.err.printf("Simulator::sendUnicast: unknown receiverId %d\n", receiverId);
+            emitToTracer("Simulator::sendUnicast: unknown receiverId %d", receiverId);
             return;
         }
         if (senderId<0 || senderId>=nodes.length) {
-            System.err.printf("Simulator::sendUnicast: unknown senderId %d\n", senderId);
+            emitToTracer("Simulator::sendUnicast: unknown senderId %d", senderId);
             return;
         }
         if (traceMessages) emitToTracer("Unicast:%d->%d", senderId, receiverId);
@@ -87,7 +87,7 @@ public class Simulator {
     
     public void sendBroadcast(int senderId, LogicalTimestamp timestamp, String payload) {
         if (senderId<0 || senderId>=nodes.length) {
-            System.err.printf("Simulator::sendBroadcast: unknown senderId %d\n", senderId);
+            emitToTracer("Simulator::sendBroadcast: unknown senderId %d", senderId);
             return;
         }
         if (traceMessages) emitToTracer("Broadcast:%d->0..%d", senderId, nodes.length-1);
