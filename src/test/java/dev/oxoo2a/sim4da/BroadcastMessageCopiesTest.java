@@ -9,7 +9,7 @@ import dev.oxoo2a.sim4da.Message.MessageType;
 public class BroadcastMessageCopiesTest {
     
     private static final int NUMBER_OF_NODES = 5;
-    private static final int DURATION = 2;
+    private static final int DURATION = 2000;
     
     @Test
     public void areMessagesCopied () {

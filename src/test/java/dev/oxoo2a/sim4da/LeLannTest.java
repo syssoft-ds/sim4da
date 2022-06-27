@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 public class LeLannTest {
     
     private static final int NUMBER_OF_NODES = 3;
-    private static final int DURATION = 2;
+    private static final int DURATION = 2000;
     
     @Test
     public void runLeLannSimulation() {

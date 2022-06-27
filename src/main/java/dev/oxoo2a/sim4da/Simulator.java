@@ -47,12 +47,12 @@ public class Simulator {
         for (Node node : nodes) {
             if (node==null) throw new InstantiationException();
         }
-        emitToTracer("Simulator::runSimulation with %d nodes for %d seconds", nodes.length, duration);
+        emitToTracer("Simulator::runSimulation with %d nodes for %d ms", nodes.length, duration);
         for (Node node : nodes) {
             node.start();
         }
         try {
-            Thread.sleep(duration*1000L); // Wait for the required duration
+            Thread.sleep(duration); // Wait for the required duration
         } catch (InterruptedException ignored) {}
         stillSimulating=false;
         for (Node node : nodes) { // Tell all nodes to stop and wait for the threads to terminate
