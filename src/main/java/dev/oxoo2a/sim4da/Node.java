@@ -106,7 +106,11 @@ public abstract class Node implements Runnable {
         }
         private Message await() {
             try {
-                return queue.take().message;
+                Message m = queue.take().message;
+                int maxLatency = simulator.getMaxMessageLatency();
+                if (maxLatency>0)
+                    Thread.sleep(random.nextInt(maxLatency)); // simulate latencies by sleeping for a random duration
+                return m;
             } catch (InterruptedException ignored) {}
             return null; // Simulation time ended before a message was received
         }
@@ -115,7 +119,7 @@ public abstract class Node implements Runnable {
             private final int priority;
             private MessageWithPriority(Message message) {
                 this.message = message;
-                this.priority = random.nextInt(100); //limit range to avoid int overflows when comparing
+                this.priority = random.nextInt(100); // limit range to avoid int overflows when comparing
             }
             @Override
             public int compareTo(MessageWithPriority other) {

@@ -11,23 +11,25 @@ public class Simulator {
     private final Node[] nodes;
     private final Tracer tracer;
     private final TimestampType timestampType;
+    private final int maxMessageLatency;
     private final boolean traceMessages;
     
     // This is only changed to false once in the main thread, but still needs to be volatile
     // to ensure that all Node threads can actually see that change.
     private volatile boolean stillSimulating = true;
     
-    public Simulator(int numberOfNodes, TimestampType timestampType) { // without tracing
-        this(numberOfNodes, timestampType, null, false, null, false);
+    public Simulator(int numberOfNodes, TimestampType timestampType, int maxMessageLatency) { // without tracing
+        this(numberOfNodes, timestampType, maxMessageLatency, null, false, null, false);
     }
     
-    public Simulator(int numberOfNodes, TimestampType timestampType, String tracerName,
+    public Simulator(int numberOfNodes, TimestampType timestampType, int maxMessageLatency, String tracerName,
                      boolean useLog4j2, PrintStream alternativeTracingDestination, boolean traceMessages) {
         nodes = new Node[numberOfNodes];
         if (useLog4j2 || alternativeTracingDestination!=null)
             tracer = new Tracer(tracerName, false, useLog4j2, alternativeTracingDestination);
         else tracer = null; //no tracing
         this.timestampType = timestampType;
+        this.maxMessageLatency = maxMessageLatency;
         this.traceMessages = traceMessages;
     }
     
@@ -63,12 +65,16 @@ public class Simulator {
         return nodes.length;
     }
     
-    public boolean isStillSimulating() {
-        return stillSimulating;
+    public int getMaxMessageLatency() {
+        return maxMessageLatency;
     }
     
     public boolean isTraceMessages() {
         return traceMessages;
+    }
+    
+    public boolean isStillSimulating() {
+        return stillSimulating;
     }
     
     public void sendUnicast(int senderId, int receiverId, LogicalTimestamp timestamp, String payload) {
