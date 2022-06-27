@@ -13,7 +13,7 @@ public class LeLannTest {
     
     @Test
     public void runLeLannSimulation() {
-        Simulator s = new Simulator(NUMBER_OF_NODES, TimestampType.VECTOR, "LeLann", true, true, System.out);
+        Simulator s = new Simulator(NUMBER_OF_NODES, TimestampType.VECTOR, "LeLann", true, System.out, true);
         for (int id = 0; id<NUMBER_OF_NODES; id++) {
             Node n = new LeLannNode(s, id);
             s.attachNode(n);

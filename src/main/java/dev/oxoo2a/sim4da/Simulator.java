@@ -11,26 +11,24 @@ public class Simulator {
     private final Node[] nodes;
     private final Tracer tracer;
     private final TimestampType timestampType;
+    private final boolean traceMessages;
     
     // This is only changed to false once in the main thread, but still needs to be volatile
     // to ensure that all Node threads can actually see that change.
     private volatile boolean stillSimulating = true;
     
-    public Simulator(int numberOfNodes, TimestampType timestampType, String name,
-                     boolean orderedTracing, boolean useLog4j2, PrintStream alternativeTracingDestination) {
+    public Simulator(int numberOfNodes, TimestampType timestampType) { //without tracing
+        this(numberOfNodes, timestampType, null, false, null, false);
+    }
+    
+    public Simulator(int numberOfNodes, TimestampType timestampType, String tracerName,
+                     boolean useLog4j2, PrintStream alternativeTracingDestination, boolean traceMessages) {
         nodes = new Node[numberOfNodes];
         if (useLog4j2 || alternativeTracingDestination!=null)
-            tracer = new Tracer(name, orderedTracing, useLog4j2, alternativeTracingDestination);
+            tracer = new Tracer(tracerName, false, useLog4j2, alternativeTracingDestination);
         else tracer = null; //no tracing
         this.timestampType = timestampType;
-    }
-    
-    public static Simulator createDefaultSimulator(int numberOfNodes) {
-        return new Simulator(numberOfNodes, TimestampType.EXTENDED_LAMPORT, "sim4da", true, true, System.out);
-    }
-    
-    public static Simulator createSimulatorUsingLog4j2(int numberOfNodes) {
-        return new Simulator(numberOfNodes, TimestampType.EXTENDED_LAMPORT, "sim4da", true, true, null);
+        this.traceMessages = traceMessages;
     }
     
     public void attachNode(Node node) throws IllegalArgumentException {
@@ -69,6 +67,10 @@ public class Simulator {
         return stillSimulating;
     }
     
+    public boolean isTraceMessages() {
+        return traceMessages;
+    }
+    
     public void sendUnicast(int senderId, int receiverId, LogicalTimestamp timestamp, String payload) {
         if (receiverId<0 || receiverId>=nodes.length) {
             System.err.printf("Simulator::sendUnicast: unknown receiverId %d\n", receiverId);
@@ -78,7 +80,7 @@ public class Simulator {
             System.err.printf("Simulator::sendUnicast: unknown senderId %d\n", senderId);
             return;
         }
-        emitToTracer("Unicast:%d->%d", senderId, receiverId);
+        if (traceMessages) emitToTracer("Unicast:%d->%d", senderId, receiverId);
         Message raw = new Message(senderId, receiverId, MessageType.UNICAST, timestamp, payload);
         nodes[receiverId].putInMessageQueue(raw);
     }
@@ -88,7 +90,7 @@ public class Simulator {
             System.err.printf("Simulator::sendBroadcast: unknown senderId %d\n", senderId);
             return;
         }
-        emitToTracer("Broadcast:%d->0..%d", senderId, nodes.length-1);
+        if (traceMessages) emitToTracer("Broadcast:%d->0..%d", senderId, nodes.length-1);
         Message raw = new Message(senderId, -1, MessageType.BROADCAST, timestamp, payload);
         for (int i = 0; i<nodes.length; i++) {
             if (i==senderId) continue; //don't send broadcast back to sender

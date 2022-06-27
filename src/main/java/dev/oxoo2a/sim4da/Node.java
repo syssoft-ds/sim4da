@@ -75,8 +75,10 @@ public abstract class Node implements Runnable {
             incrementLocalTimestamp(); // receive-event
             if (localTimestamp!=null && m.getTimestamp()!=null)
                 localTimestamp = localTimestamp.getAdjusted(m.getTimestamp()); // forward local clock if necessary
-            String messageTypeString = m.getType()==MessageType.BROADCAST ? "Broadcast" : "Unicast";
-            simulator.emitToTracer("Receive %s:%d<-%d", messageTypeString, m.getReceiverId(), m.getSenderId());
+            if (simulator.isTraceMessages()) {
+                String messageTypeString = m.getType()==MessageType.BROADCAST ? "Broadcast" : "Unicast";
+                simulator.emitToTracer("Receive %s:%d<-%d", messageTypeString, m.getReceiverId(), m.getSenderId());
+            }
         }
         return m;
     }
