@@ -7,7 +7,7 @@ The simulator strives to abstract from most of the details in network programmin
 The distributed algorithm simulation is controlled by an instance of class `Simulator`:
 
 ```Java
-    Simulator s = new Simulator(numberOfNodes);
+    Simulator s = new Simulator(numberOfNodes, TimestampType.NONE);
     for (int id = 0; id<numberOfNodes; id++) {
       Node n = new ApplicationNode(s, id);
       s.attachNode(n);
