@@ -7,17 +7,19 @@ import dev.oxoo2a.sim4da.Message.MessageType;
 
 public abstract class Node implements Runnable {
     
-    protected final int id;
-    private final MessageQueue messageQueue = new MessageQueue();
-    private final Simulator simulator;
-    private final Thread thread = new Thread(this);
     private final Random random = new Random();
+    private final MessageQueue messageQueue = new MessageQueue();
+    
+    protected final int id;
+    private final Simulator simulator;
+    private final Thread thread;
     
     private LogicalTimestamp localTimestamp;
     
     public Node(Simulator simulator, int id) {
         this.simulator = simulator;
         this.id = id;
+        thread = new Thread(this, "Node-"+id);
         localTimestamp = simulator.getInitialTimestamp(id);
     }
     
