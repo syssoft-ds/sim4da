@@ -7,7 +7,7 @@ The simulator strives to abstract from most of the details in network programmin
 The distributed algorithm simulation is controlled by an instance of class `Simulator`:
 
 ```Java
-    Simulator s = new Simulator(numberOfNodes);
+    Simulator s = new Simulator(numberOfNodes, TimestampType.NONE, 0);
     for (int id = 0; id<numberOfNodes; id++) {
       Node n = new ApplicationNode(s, id);
       s.attachNode(n);
@@ -15,7 +15,7 @@ The distributed algorithm simulation is controlled by an instance of class `Simu
     s.runSimulation(duration);
 ```
 
-By instantiating a Simulator object, a network of `numberOfNodes` nodes is created. For each node `id` between `[0, numberOfNodes)` the code for the given `id` must be attached to the simulator. This `ApplicationNode` is derived from the abstract class `Node` which provides all the required functionality for implementing the algorithm simulation (see below). Finally, the simulation can be executed for `duration` seconds.
+By instantiating a Simulator object, a network of `numberOfNodes` nodes is created. For each node `id` between `[0, numberOfNodes)` the code for the given `id` must be attached to the simulator. This `ApplicationNode` is derived from the abstract class `Node` which provides all the required functionality for implementing the algorithm simulation (see below). Finally, the simulation can be executed for `duration` milliseconds.
 
 Extending class `Node` enables the implementation of the intended distributed algorithm by implementing the method `run`:
 

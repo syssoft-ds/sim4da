@@ -7,25 +7,27 @@ import dev.oxoo2a.sim4da.Message.MessageType;
 
 public abstract class Node implements Runnable {
     
-    protected final int id;
-    private final MessageQueue messageQueue = new MessageQueue();
-    private final Simulator simulator;
-    private final Thread thread = new Thread(this);
     private final Random random = new Random();
+    private final MessageQueue messageQueue = new MessageQueue();
+    
+    protected final int id;
+    private final Simulator simulator;
+    private final Thread thread;
     
     private LogicalTimestamp localTimestamp;
     
     public Node(Simulator simulator, int id) {
         this.simulator = simulator;
         this.id = id;
+        thread = new Thread(this, "Node-"+id);
         localTimestamp = simulator.getInitialTimestamp(id);
     }
     
-    public void start() {
+    void start() {
         thread.start();
     }
     
-    public void stop() {
+    void stop() {
         thread.interrupt(); // Stop waiting in receive
         try {
             thread.join();
@@ -40,7 +42,7 @@ public abstract class Node implements Runnable {
         return simulator.isStillSimulating();
     }
     
-    public LogicalTimestamp getLocalTimestamp() {
+    protected LogicalTimestamp getLocalTimestamp() {
         return localTimestamp;
     }
     
@@ -75,8 +77,10 @@ public abstract class Node implements Runnable {
             incrementLocalTimestamp(); // receive-event
             if (localTimestamp!=null && m.getTimestamp()!=null)
                 localTimestamp = localTimestamp.getAdjusted(m.getTimestamp()); // forward local clock if necessary
-            String messageTypeString = m.getType()==MessageType.BROADCAST ? "Broadcast" : "Unicast";
-            simulator.emitToTracer("Receive %s:%d<-%d", messageTypeString, m.getReceiverId(), m.getSenderId());
+            if (simulator.isTraceMessages()) {
+                String messageTypeString = m.getType()==MessageType.BROADCAST ? "Broadcast" : "Unicast";
+                simulator.emitToTracer("Receive %s:%d<-%d", messageTypeString, m.getReceiverId(), m.getSenderId());
+            }
         }
         return m;
     }
@@ -104,7 +108,11 @@ public abstract class Node implements Runnable {
         }
         private Message await() {
             try {
-                return queue.take().message;
+                Message m = queue.take().message;
+                int maxLatency = simulator.getMaxMessageLatency();
+                if (maxLatency>0)
+                    Thread.sleep(random.nextInt(maxLatency)); // simulate latencies by sleeping for a random duration
+                return m;
             } catch (InterruptedException ignored) {}
             return null; // Simulation time ended before a message was received
         }
@@ -113,7 +121,7 @@ public abstract class Node implements Runnable {
             private final int priority;
             private MessageWithPriority(Message message) {
                 this.message = message;
-                this.priority = random.nextInt(100); //limit range to avoid int overflows when comparing
+                this.priority = random.nextInt(100); // limit range to avoid int overflows when comparing
             }
             @Override
             public int compareTo(MessageWithPriority other) {
