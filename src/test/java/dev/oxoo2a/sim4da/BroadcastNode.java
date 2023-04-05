@@ -13,7 +13,6 @@ public class BroadcastNode extends Node {
         int broadcasts_received = 0;
         int broadcasts_sent = 0;
         int loops = 0;
-        // System.out.printf("This is node %d\n", myId());
         // Create a message with a random candidate to send the next broadcast
         Message m_broadcast = new Message().add("Sender",myId).add("Candidate",r.nextInt(numberOfNodes()));
         sendBroadcast(m_broadcast);
@@ -28,7 +27,7 @@ public class BroadcastNode extends Node {
             // JSON encoded messages must be deserialized into a Message object
             Message m_json = Message.fromJson(m_raw.payload);
             int c = Integer.parseInt(m_json.query("Candidate"));
-            // Who's the nexy candidate for sending a broadcast message. There's also a small probability, that we
+            // Who's the next candidate for sending a broadcast message. There's also a small probability, that we
             // send a broadcast message anyway :-)
             if ((c == myId) || (r.nextInt(100) < 5)) {
                 // The next sender for a broadcast message is selected randomly
@@ -37,6 +36,6 @@ public class BroadcastNode extends Node {
                 broadcasts_sent++;
             }
         }
-        System.out.printf("%d: %d broadcasts received and %d broadcasts sent\n",myId,broadcasts_received,broadcasts_sent);
+        emit("%d: %d broadcasts received and %d broadcasts sent",myId,broadcasts_received,broadcasts_sent);
     }
 }
