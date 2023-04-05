@@ -12,11 +12,14 @@ public class BroadcastNode extends Node {
         Random r = new Random();
         int broadcasts_received = 0;
         int broadcasts_sent = 0;
+        int loops = 0;
         // System.out.printf("This is node %d\n", myId());
         // Create a message with a random candidate to send the next broadcast
         Message m_broadcast = new Message().add("Sender",myId).add("Candidate",r.nextInt(numberOfNodes()));
         sendBroadcast(m_broadcast);
         while (stillSimulating()) {
+            loops++;
+            emit("Node %d, Loop %d",myId,loops);
             Network.Message m_raw = receive();
             if (m_raw == null) break; // Null == Simulation time ends while waiting for a message
             broadcasts_received++;

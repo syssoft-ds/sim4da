@@ -1,19 +1,22 @@
 package dev.oxoo2a.sim4da;
 
-public abstract class Node {
+public abstract class Node implements SimulatedNode {
 
     public Node ( int my_id ) {
         this.myId = my_id;
         t_main = new Thread(this::main);
     }
 
+    @Override
     public void setSimulation ( Simulation s ) {
         this.simulation = s;
     }
 
+    @Override
     public void start () {
         t_main.start();
     }
+
     private void sleep ( long millis ) {
         try {
             Thread.sleep(millis);
@@ -46,9 +49,13 @@ public abstract class Node {
         return simulation.receive(myId);
     }
 
+    protected void emit ( String format, Object ... args ) {
+        simulation.emit(format,args);
+    }
     // Module implements basic node functionality
     protected abstract void main ();
 
+    @Override
     public void stop () {
         try {
             t_main.join();

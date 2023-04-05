@@ -17,7 +17,7 @@ public class Simulator implements Simulation {
         this.n_nodes = n_nodes;
         tracer = new Tracer(name,ordered,enableTracing,useLog4j2,alternativeDestination);
         network = new Network(n_nodes,tracer);
-        nodes = new HashMap<Integer, Node>(n_nodes);
+        nodes = new HashMap<Integer, SimulatedNode>(n_nodes);
         for (int n_id = 0; n_id < n_nodes; ++n_id)
             nodes.put(n_id, null);
     }
@@ -27,21 +27,21 @@ public class Simulator implements Simulation {
         return n_nodes;
     }
 
-    public void attachNode (int id, Node node ) {
+    public void attachNode (int id, SimulatedNode node ) {
         if ((0 <= id) && (id < n_nodes))
             nodes.replace(id,node);
     }
 
     public void runSimulation ( int duration ) throws InstantiationException {
         // Check that all nodes are attached
-        for ( Node n : nodes.values() ) {
+        for ( SimulatedNode n : nodes.values() ) {
             if (n == null) throw new InstantiationException();
             n.setSimulation(this);
         }
 
         tracer.emit("Simulator::runSimulation with %d nodes for %d seconds",n_nodes,duration);
         is_simulating = true;
-        nodes.values().forEach(Node::start);
+        nodes.values().forEach(SimulatedNode::start);
         // Wait for the required duration
         try {
             Thread.sleep(duration * 1000L);
@@ -53,7 +53,7 @@ public class Simulator implements Simulation {
         network.stop();
 
         // Tell all nodes to stop and wait for the threads to terminate
-        nodes.values().forEach(Node::stop);
+        nodes.values().forEach(SimulatedNode::stop);
         tracer.emit("Simulator::runSimulation finished");
     }
 
@@ -95,6 +95,6 @@ public class Simulator implements Simulation {
     private final int n_nodes;
     private final Tracer tracer;
     private final Network network;
-    private final HashMap<Integer, Node> nodes;
+    private final HashMap<Integer, SimulatedNode> nodes;
     private boolean is_simulating = false;
 }
