@@ -5,47 +5,40 @@
  */
 
 plugins {
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
     id 'java'
-    id 'maven-publish'
 }
 
-repositories {
-    mavenLocal()
-    maven {
-        url = uri('https://repo.maven.apache.org/maven2/')
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(19)
     }
 }
 
-dependencies {
-    implementation('com.google.code.gson:gson:2.9.0')
+repositories {
+    mavenCentral()
+}
 
-    implementation(platform('org.apache.logging.log4j:log4j-bom:2.17.2'))
+dependencies {
+    implementation('com.google.code.gson:gson:2.10')
+
+    implementation(platform('org.apache.logging.log4j:log4j-bom:2.20.0'))
     implementation 'org.apache.logging.log4j:log4j-api'
     implementation 'org.apache.logging.log4j:log4j-core'
     
-    testImplementation(platform('org.junit:junit-bom:5.8.2'))
+    testImplementation(platform('org.junit:junit-bom:5.9.2'))
 	testImplementation('org.junit.jupiter:junit-jupiter')
 }
 
 group = 'dev.oxoo2a'
-version = '1.4-SNAPSHOT'
+version = '2.0-SNAPSHOT'
 description = 'sim4da'
-java.sourceCompatibility = JavaVersion.VERSION_17
 
 test {
 	useJUnitPlatform()
 	testLogging {
 		events "passed", "skipped", "failed"
 	}
-}
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            from(components.java)
-        }
-    }
 }
 
 tasks.withType(JavaCompile) {
