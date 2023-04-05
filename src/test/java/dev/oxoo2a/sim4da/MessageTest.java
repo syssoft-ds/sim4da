@@ -16,7 +16,7 @@ public class MessageTest {
 	public void testMessageBasics () {
 		assertEquals(m.query("a"), "b");
 		assertEquals(m.query("c"), "d");
-		assertEquals(m.query("no_key"),null);
+		assertNull(m.query("no_key"));
 	}
 
 	@Test
