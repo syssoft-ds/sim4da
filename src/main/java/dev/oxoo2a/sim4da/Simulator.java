@@ -3,7 +3,7 @@ package dev.oxoo2a.sim4da;
 import java.util.HashMap;
 import java.io.PrintStream;
 
-public class Simulator {
+public class Simulator implements Simulation {
 
     public static Simulator createDefaultSimulator ( int n_nodes ) {
         return new Simulator(n_nodes, "sim4da", true, true, true, System.out);
@@ -22,7 +22,12 @@ public class Simulator {
             nodes.put(n_id, null);
     }
 
-    public void attachNode ( int id, Node node ) {
+    @Override
+    public int numberOfNodes() {
+        return n_nodes;
+    }
+
+    public void attachNode (int id, Node node ) {
         if ((0 <= id) && (id < n_nodes))
             nodes.replace(id,node);
     }
@@ -31,17 +36,18 @@ public class Simulator {
         // Check that all nodes are attached
         for ( Node n : nodes.values() ) {
             if (n == null) throw new InstantiationException();
-            n.setNetwork(network);
-            n.setTracer(tracer);
+            n.setSimulation(this);
         }
 
         tracer.emit("Simulator::runSimulation with %d nodes for %d seconds",n_nodes,duration);
+        is_simulating = true;
         nodes.values().forEach(Node::start);
         // Wait for the required duration
         try {
             Thread.sleep(duration * 1000L);
         }
         catch (InterruptedException ignored) {}
+        is_simulating = false;
 
         // Stop network - release nodes waiting in receive ...
         network.stop();
@@ -51,8 +57,44 @@ public class Simulator {
         tracer.emit("Simulator::runSimulation finished");
     }
 
+    @Override
+    public boolean stillSimulating() {
+        return is_simulating;
+    }
+
+    @Override
+    public void sendUnicast(int sender_id, int receiver_id, String m) {
+        network.unicast(sender_id,receiver_id,m);
+    }
+
+    @Override
+    public void sendUnicast ( int sender_id, int receiver_id, Message m ) {
+        network.unicast(sender_id,receiver_id,m.toJson());
+    }
+
+    @Override
+    public void sendBroadcast ( int sender_id, String m ) {
+        network.broadcast(sender_id,m);
+    }
+
+    @Override
+    public void sendBroadcast ( int sender_id, Message m ) {
+        network.broadcast(sender_id,m.toJson());
+    }
+
+    @Override
+    public Network.Message receive ( int receiver_id ) {
+        return network.receive(receiver_id);
+    }
+
+    @Override
+    public void emit ( String format, Object ... args ) {
+        tracer.emit(format,args);
+    }
+
     private final int n_nodes;
     private final Tracer tracer;
     private final Network network;
     private final HashMap<Integer, Node> nodes;
+    private boolean is_simulating = false;
 }
