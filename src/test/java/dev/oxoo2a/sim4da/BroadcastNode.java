@@ -20,7 +20,7 @@ public class BroadcastNode extends Node {
             loops++;
             emit("Node %d, Loop %d",myId,loops);
             Network.Message m_raw = receive();
-            if (m_raw == null) break; // Null == Simulation time ends while waiting for a message
+            if (m_raw == null) break; // Null == Node2Simulator time ends while waiting for a message
             broadcasts_received++;
             // The following printf shows the elements of Network.Message except the message type unicast or broadcast
             // System.out.printf("%d: from %d, payload=<%s>\n",myId(),m_raw.sender_id,m_raw.payload);

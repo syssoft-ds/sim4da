@@ -1,6 +1,6 @@
 package dev.oxoo2a.sim4da;
 
-public abstract class Node implements SimulatedNode {
+public abstract class Node implements Simulator2Node {
 
     public Node ( int my_id ) {
         this.myId = my_id;
@@ -8,8 +8,8 @@ public abstract class Node implements SimulatedNode {
     }
 
     @Override
-    public void setSimulation ( Simulation s ) {
-        this.simulation = s;
+    public void setSimulator(Node2Simulator s ) {
+        this.simulator = s;
     }
 
     @Override
@@ -24,33 +24,33 @@ public abstract class Node implements SimulatedNode {
         catch (InterruptedException e) {};
     }
 
-    protected int numberOfNodes() { return simulation.numberOfNodes(); };
+    protected int numberOfNodes() { return simulator.numberOfNodes(); };
 
     protected boolean stillSimulating () {
-        return simulation.stillSimulating();
+        return simulator.stillSimulating();
     }
     protected void sendUnicast ( int receiver_id, String m ) {
-        simulation.sendUnicast(myId,receiver_id,m);
+        simulator.sendUnicast(myId,receiver_id,m);
     }
 
     protected void sendUnicast ( int receiver_id, Message m ) {
-        simulation.sendUnicast(myId,receiver_id, m.toJson());
+        simulator.sendUnicast(myId,receiver_id, m.toJson());
     }
 
     protected void sendBroadcast ( String m ) {
-        simulation.sendBroadcast(myId,m);
+        simulator.sendBroadcast(myId,m);
     }
 
     protected void sendBroadcast ( Message m ) {
-        simulation.sendBroadcast(myId,m.toJson());
+        simulator.sendBroadcast(myId,m.toJson());
     }
 
     protected Network.Message receive () {
-        return simulation.receive(myId);
+        return simulator.receive(myId);
     }
 
     protected void emit ( String format, Object ... args ) {
-        simulation.emit(format,args);
+        simulator.emit(format,args);
     }
     // Module implements basic node functionality
     protected abstract void main ();
@@ -64,6 +64,6 @@ public abstract class Node implements SimulatedNode {
     }
 
     protected final int myId;
-    private Simulation simulation;
+    private Node2Simulator simulator;
     private final Thread t_main;
 }

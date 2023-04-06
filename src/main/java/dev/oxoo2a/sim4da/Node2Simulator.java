@@ -1,6 +1,6 @@
 package dev.oxoo2a.sim4da;
 
-public interface Simulation {
+public interface Node2Simulator {
     int numberOfNodes();
     boolean stillSimulating ();
     void sendUnicast ( int sender_id, int receiver_id, String m );
