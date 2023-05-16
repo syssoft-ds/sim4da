@@ -10,6 +10,7 @@ public class ClockUtil {
         };
     }
 
+    //{"%T0":"389","%T1":"388","%T2":"388","%T3":"388","%T4":"388","counter":"1940"}
     public static void synchronize(LogicClock lc, String s){
 
     }

@@ -24,14 +24,14 @@ public class VectorClock implements LogicClock{
     }
 
     @Override
-    public void synchronize(LogicClock clock, int nodeId) {
-        HashMap<Integer, Integer> vector = ((VectorClock) clock).getTimeVector();
-        for (Integer id: vector.keySet()){
-            this.timeVector.replace(id, Math.max(timeVector.get(id), vector.get(id)));
-        }
+    public void synchronize(String timeStamp) {
 
     }
 
+    @Override
+    public ClockType getType() {
+        return type;
+    }
     @Override
     public int getTime() {
         return timeVector.get(nodeId);

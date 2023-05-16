@@ -1,10 +1,22 @@
 package dev.oxoo2a.sim4da.clock;
 
-public interface LogicClock {
+/*TODO: Klasse in ABstrakt ändern. Gemeinsame Methode "synchronize(String) mit Tokenizer findet alle ID - Timestamp Paare"
+*  Über ClockType Kondition verrechnen
+*/
+
+public abstract class LogicClock {
 
 
-    public void tick();
-    public void synchronize(LogicClock clock, int nodeId);
-    public int getTime();
+
+    public ClockType getType(){
+
+    }
+    public void tick(){
+
+    }
+    public void synchronize(String timeStamp){}
+    public int getTime(){
+
+    }
 
 }
