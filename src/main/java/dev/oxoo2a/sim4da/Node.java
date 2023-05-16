@@ -1,8 +1,11 @@
 package dev.oxoo2a.sim4da;
+import java.lang.IllegalArgumentException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 
 public abstract class Node implements Simulator2Node {
 
-    public Node ( int my_id ) {
+    public Node (int my_id ) {
         this.myId = my_id;
         t_main = new Thread(this::main);
     }
@@ -10,6 +13,22 @@ public abstract class Node implements Simulator2Node {
     @Override
     public void setSimulator(Node2Simulator s ) {
         this.simulator = s;
+    }
+    @Override
+    public void createClockByClass(String type, int n_nodes, int index) throws IllegalArgumentException {
+
+        switch (type) {
+            case "lamport":
+                this.clock = new Lamport();
+                break;
+            case "vector":
+                this.clock = new Vector(n_nodes, index);
+                break;
+            default:
+                throw new IllegalArgumentException("The class name must be either vector or lamport!");
+        }
+
+
     }
 
     @Override
@@ -49,8 +68,8 @@ public abstract class Node implements Simulator2Node {
         return simulator.receive(myId);
     }
 
-    protected void emit ( String format, Object ... args ) {
-        simulator.emit(format,args);
+    protected void emit (String format, String logType,  Object ... args ) {
+        simulator.emit(format,logType,args);
     }
     // Module implements basic node functionality
     protected abstract void main ();
@@ -64,6 +83,7 @@ public abstract class Node implements Simulator2Node {
     }
 
     protected final int myId;
-    private Node2Simulator simulator;
+    protected Node2Simulator simulator;
     private final Thread t_main;
+    protected Clock clock;
 }

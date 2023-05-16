@@ -1,7 +1,9 @@
 package dev.oxoo2a.sim4da;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.io.PrintStream;
+import java.util.Map;
 
 public class Simulator implements Node2Simulator {
 
@@ -32,14 +34,22 @@ public class Simulator implements Node2Simulator {
             nodes.replace(id,node);
     }
 
-    public void runSimulation ( int duration ) throws InstantiationException {
+    public void runSimulation (int duration, String type) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         // Check that all nodes are attached
-        for ( Simulator2Node n : nodes.values() ) {
+        /*for (Simulator2Node n : nodes.values()) {
             if (n == null) throw new InstantiationException();
             n.setSimulator(this);
+            n.createClockByClass(type, nodes.size(), n.ge);
+        }*/
+        for (Map.Entry<Integer, Simulator2Node> elem: nodes.entrySet())
+        {
+            Simulator2Node n = elem.getValue();
+            if (n == null) throw new InstantiationException();
+            n.setSimulator(this);
+            n.createClockByClass(type, nodes.size(), elem.getKey());
         }
 
-        tracer.emit("Simulator::runSimulation with %d nodes for %d seconds",n_nodes,duration);
+        tracer.emit("main","Simulator::runSimulation with %d nodes for %d seconds",n_nodes,duration);
         is_simulating = true;
         nodes.values().forEach(Simulator2Node::start);
         // Wait for the required duration
@@ -54,7 +64,7 @@ public class Simulator implements Node2Simulator {
 
         // Tell all nodes to stop and wait for the threads to terminate
         nodes.values().forEach(Simulator2Node::stop);
-        tracer.emit("Simulator::runSimulation finished");
+        tracer.emit("main","Simulator::runSimulation finished");
     }
 
     @Override
@@ -88,8 +98,8 @@ public class Simulator implements Node2Simulator {
     }
 
     @Override
-    public void emit ( String format, Object ... args ) {
-        tracer.emit(format,args);
+    public void emit (String format, String logType, Object ... args) {
+        tracer.emit(format,logType, args);
     }
 
     private final int n_nodes;

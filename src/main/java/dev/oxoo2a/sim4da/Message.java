@@ -9,12 +9,16 @@ import com.google.gson.reflect.TypeToken;
 
 public class Message {
 
+
+
     public Message () {
         content = new HashMap<>();
+
     }
 
     protected Message ( HashMap<String,String> content ) {
         this.content = content;
+
     }
     public Message add ( String key, String value ) {
         content.put(key,value);
@@ -48,6 +52,9 @@ public class Message {
         return serializer.toJson(content); // Not sure about thread safety of Gson
     }
 
+
+
     private final HashMap<String,String> content;
     private static final Gson serializer = new Gson();
+
 }
