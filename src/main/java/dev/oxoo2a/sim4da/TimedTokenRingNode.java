@@ -3,6 +3,10 @@ package dev.oxoo2a.sim4da;
 import dev.oxoo2a.sim4da.clock.ClockType;
 import dev.oxoo2a.sim4da.clock.TimedNode;
 
+/**
+ * Example. Class extends TimedNode. Aside from adding the very first timestamp and specifying the ClockType in the
+ * constructor, this class is identical to the TokenRingNode example;
+ */
 public class TimedTokenRingNode extends TimedNode {
     public TimedTokenRingNode(int my_id, ClockType type) {
         super(my_id, type);
@@ -24,11 +28,7 @@ public class TimedTokenRingNode extends TimedNode {
 
             if(m_raw == null) break;
 
-            System.out.println("Class");
-            System.out.println(m_raw.getClass());
             m = Message.fromJson(m_raw.payload);
-            System.out.println("message in node loop");
-            System.out.println(m);
             int counter = Integer.parseInt(m.query("counter"));
             emit("%d: counter == %d", myId, counter);
             counter++;

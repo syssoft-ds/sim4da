@@ -8,6 +8,11 @@ import java.time.Clock;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 
+/**
+ * Logic Clock are instantiated for each Node. A LogicClock saves its NodeID, timestamp, and temporary timestamps
+ * as received from other Nodes to synchronize. Further sata and functionality is handled by Subclasses (e.g. LamportClock.java)
+ */
+
 public abstract class LogicClock {
 
     protected int nodeId;
@@ -19,7 +24,6 @@ public abstract class LogicClock {
         this.nodeId = nodeId;
         this.type = type;
         this.time =0;
-
     }
 
     public ClockType getType(){
@@ -28,14 +32,28 @@ public abstract class LogicClock {
     public void tick(){
         this.time++;
     }
+
+    /**
+     * Parent Method to synchronize a Clock with a Time String as received in a Message.
+     * synchronize() utilizes String Tokenization to extract all Timestamps from the Payload string. A Timestamp in the
+     * Payload always leads with the Characters '%T'.
+     * The IDs and Times are saved in a Hashmap 'tempTimestamps' that is cleared with every new call of the method.
+     * tempTimestamps is used in the child class method to access all timestamps. When using Lamport time,
+     * the tempTimestamps Map always contains exactly one entry.
+     * Subclasses Override this Function by adding statements regarding the handling of the extracted Time information.
+     * @param timeStamp the entire Payload string from the Message
+     */
     public void synchronize(String timeStamp){
+        //First Tokenizer to collect all entrys from the payload
         StringTokenizer tokenizer = new StringTokenizer(timeStamp, ",");
         tempTimestamps.clear();
         while (tokenizer.hasMoreTokens()){
             int senderId = -1;
             String token = tokenizer.nextToken();
             String s = "";
+            // if token is marked as containing a timestamp
             if (token.contains("%T")) {
+                // Seconds Tokenizer splits entry into Node ID and associated timestamp
                 StringTokenizer subTokenizer = new StringTokenizer(token, ":");
                 s = subTokenizer.nextToken();
                 for (int i = 0; i < s.length(); i++) {
@@ -48,8 +66,6 @@ public abstract class LogicClock {
 
                 s = subTokenizer.nextToken();
                 int senderTime = Integer.parseInt(s.substring(1, s.length()-1));
-                System.out.println("Extracted TimeStamp Data:");
-                System.out.println("[ " + senderId + " : " + senderTime + " ] -|- MyID: "+ this.nodeId);
                 tempTimestamps.put(senderId, senderTime);
             }
         }
