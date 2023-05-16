@@ -1,6 +1,6 @@
 package dev.oxoo2a.sim4da.clock;
 
-public class ClockFactory {
+public class ClockUtil {
 
     public static LogicClock create(int id, ClockType type){
 
@@ -8,6 +8,10 @@ public class ClockFactory {
             case LAMPORT -> new LampertClock(id);
             case VECTOR -> new VectorClock(id);
         };
+    }
+
+    public static void synchronize(LogicClock lc, String s){
+
     }
 
 }

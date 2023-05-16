@@ -64,6 +64,6 @@ public abstract class Node implements Simulator2Node {
     }
 
     protected final int myId;
-    private Node2Simulator simulator;
+    protected Node2Simulator simulator;
     private final Thread t_main;
 }
