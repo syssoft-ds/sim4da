@@ -8,7 +8,7 @@ public class Main {
         int n_nodes = 5;
         Simulator s = Simulator.createDefaultSimulator(n_nodes);
         for (int id=0; id<n_nodes; id++) {
-            Node n = new TimedTokenRingNode(id, ClockType.LAMPORT);
+            Node n = new TimedTokenRingNode(id, ClockType.VECTOR);
             s.attachNode(id,n);
         }
         try{
@@ -17,5 +17,6 @@ public class Main {
         }catch (InstantiationException e){
             System.err.println("Instantiation failed. Time to investigate.");
         }
+
     }
 }

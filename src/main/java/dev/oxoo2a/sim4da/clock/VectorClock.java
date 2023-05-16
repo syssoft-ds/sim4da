@@ -6,14 +6,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 
-public class VectorClock implements LogicClock{
-    private int nodeId;
-    private HashMap<Integer, Integer> timeVector;
+public class VectorClock extends LogicClock{
+    private final HashMap<Integer, Integer> timeVector;
     public final ClockType type = ClockType.VECTOR;
 
     public VectorClock (int nodeId){
-        this.nodeId = nodeId;
-
+        super(nodeId, ClockType.VECTOR);
         this.timeVector = new HashMap<>();
         this.timeVector.put(nodeId, 0);
     }
@@ -25,26 +23,40 @@ public class VectorClock implements LogicClock{
 
     @Override
     public void synchronize(String timeStamp) {
+        super.synchronize(timeStamp);
+        for(Integer id: this.tempTimestamps.keySet()){
 
+            System.out.println("Received Vector= id" + id + " : time:" + this.tempTimestamps.get(id));
+            if(!this.timeVector.containsKey(id)){
+                System.out.println("Vector entry was not present in current node and was added.");
+                this.timeVector.put(id, this.tempTimestamps.get(id));
+
+            }else{
+                System.out.println("This Vector Entry= id:" + id + " : time:" + this.timeVector.get(id) );
+                this.timeVector.put(id, Math.max(this.timeVector.get(id), this.tempTimestamps.get(id)));
+            }
+            System.out.println("updated node time vector= id " + id + " : time:" + timeVector.get(id));
+        }
+        this.time = this.timeVector.get(getNodeId());
     }
 
     @Override
     public ClockType getType() {
-        return type;
+        return this.type;
     }
     @Override
     public int getTime() {
-        return timeVector.get(nodeId);
+        return this.timeVector.get(nodeId);
     }
     public int getTime(int id){
-        return timeVector.get(id);
+        return this.timeVector.get(id);
     }
 
     public HashMap<Integer, Integer> getTimeVector() {
-        return timeVector;
+        return this.timeVector;
     }
 
     public int getNodeId() {
-        return nodeId;
+        return this.nodeId;
     }
 }

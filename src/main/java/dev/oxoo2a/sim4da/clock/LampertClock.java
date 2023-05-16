@@ -1,20 +1,29 @@
 package dev.oxoo2a.sim4da.clock;
 
-public class LampertClock implements LogicClock{
-    private int nodeId;
-    private int time;
-    public final ClockType type = ClockType.LAMPORT;
+public class LampertClock extends LogicClock{
 
     public LampertClock(int nodeId){
-        this.nodeId = nodeId;
+        super(nodeId, ClockType.LAMPORT);
         this.time = 0;
     }
+
+    @Override
+    public void synchronize(String timeStamp) {
+        super.synchronize(timeStamp);
+        if(this.tempTimestamps.keySet().size()>1){
+            System.err.println("more than one timestamp was extracted from string, should not happen");
+            System.out.println(timeStamp);
+        }
+        for (Integer senderId : tempTimestamps.keySet()){
+            this.time = Math.max(this.time, tempTimestamps.get(senderId));
+        }
+    }
+
 
 
     @Override
     public void tick() {
         this.time++;
-
     }
 
     @Override
@@ -22,44 +31,12 @@ public class LampertClock implements LogicClock{
         return type;
     }
 
-    //
-    @Override
-    public void synchronize(String timeStamp) {
-        for (int i = 0; i < timeStamp.length(); i++) {
-            if(timeStamp.charAt(i) == '%' || timeStamp.charAt(i+1) == 'T'){
-                int index = -1;
-                for (int j = i+2; j < timeStamp.length(); j++) {
-                    if (timeStamp.charAt(j)== '\"'){
-                        index= j;
-                        break;
-                    }
-                }
-                int senderId = Integer.parseInt(timeStamp.substring(i+2, index));
-                int timeIndexStart = -1;
-                int timeIndexEnd = -1;
-                for (int j = index+2; j < timeStamp.length(); j++) {
-                    if(timeStamp.charAt(j)== '\"'){
-                        timeIndexStart = j;
-                        break;
-                    }
-                }
-                for (int j = timeIndexStart+1; j < timeStamp.length(); j++) {
-                    if(timeStamp.charAt(j) == '\"'){
-                        timeIndexEnd = j;
-                    }
-                }
-                int senderTime = Integer.parseInt(timeStamp.substring(timeIndexStart, timeIndexEnd));
-                this.time = Math.max(this.time, senderTime);
-            }
-
-        }
-    }
 
     public int getTime() {
         return time;
     }
 
     public int getNodeId() {
-        return nodeId;
+        return this.getNodeId();
     }
 }

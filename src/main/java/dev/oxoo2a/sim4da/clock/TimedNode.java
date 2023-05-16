@@ -18,22 +18,27 @@ public class TimedNode extends Node {
         System.out.println("Sending timed unicast message");
         this.lc.tick();
         if(this.lc instanceof LampertClock){
+            m.getMap().entrySet().removeIf(entry -> entry.getKey().contains("%T"));
             m.add("%T"+ myId, lc.getTime());
+            System.out.println("Added [" + myId + "] : [" + lc.getTime()+ "] to message payload");
         }
         if(this.lc instanceof VectorClock){
+            m.getMap().entrySet().removeIf(entry -> entry.getKey().contains("%T"));
             for (Integer id: ((VectorClock) lc).getTimeVector().keySet()){
-                m.add("%T"+id, ((VectorClock) lc).getTime(id));
+                m.add("%T"+id, ((VectorClock) lc).getTimeVector().get(id));
             }
         }
         System.out.println(m);
         this.simulator.sendUnicast(myId,receiver_id, m.toJson());
     }
     protected Network.Message receive () {
+        lc.tick();
+
         Network.Message m = simulator.receive(myId);
-        System.out.println("Network.Message received by node " + myId);
-        System.out.println(m);
-        System.out.println("payload");
-        System.out.println(m.payload.getClass());
+        if(m != null){
+            this.lc.synchronize(m.payload);
+        }
+
         return m;
     }
 
