@@ -27,12 +27,12 @@ public class VectorClock extends LogicClock{
         for(Integer id: this.tempTimestamps.keySet()){
 
             System.out.println("Received Vector= id" + id + " : time:" + this.tempTimestamps.get(id));
+
             if(!this.timeVector.containsKey(id)){
                 System.out.println("Vector entry was not present in current node and was added.");
                 this.timeVector.put(id, this.tempTimestamps.get(id));
-
             }else{
-                System.out.println("This Vector Entry= id:" + id + " : time:" + this.timeVector.get(id) );
+                System.out.println("Current Node Vector Entry= id:" + id + " : time:" + this.timeVector.get(id) );
                 this.timeVector.put(id, Math.max(this.timeVector.get(id), this.tempTimestamps.get(id)));
             }
             System.out.println("updated node time vector= id " + id + " : time:" + timeVector.get(id));
