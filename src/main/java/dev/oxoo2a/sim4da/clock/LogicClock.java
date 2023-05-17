@@ -1,16 +1,12 @@
 package dev.oxoo2a.sim4da.clock;
 
-/*TODO: Klasse in ABstrakt ändern. Gemeinsame Methode "synchronize(String) mit Tokenizer findet alle ID - Timestamp Paare"
-*  Über ClockType Kondition verrechnen
-*/
 
-import java.time.Clock;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 
 /**
- * Logic Clock are instantiated for each Node. A LogicClock saves its NodeID, timestamp, and temporary timestamps
- * as received from other Nodes to synchronize. Further sata and functionality is handled by Subclasses (e.g. LamportClock.java)
+ * LogicClock is instantiated for each TimedNode. A LogicClock saves its NodeID, timestamp, and temporary timestamps
+ * as received from other Nodes to synchronize. Further data and functionality is handled by Subclasses LamportClock/VectorClock.
  */
 
 public abstract class LogicClock {
@@ -41,11 +37,12 @@ public abstract class LogicClock {
      * tempTimestamps is used in the child class method to access all timestamps. When using Lamport time,
      * the tempTimestamps Map always contains exactly one entry.
      * Subclasses Override this Function by adding statements regarding the handling of the extracted Time information.
-     * @param timeStamp the entire Payload string from the Message
+     * @param payload the entire Payload string from the Message
      */
-    public void synchronize(String timeStamp){
+    public void synchronize(String payload){
         //First Tokenizer to collect all entrys from the payload
-        StringTokenizer tokenizer = new StringTokenizer(timeStamp, ",");
+        StringTokenizer tokenizer = new StringTokenizer(payload, ",");
+        // clear temporary timestamp field.
         tempTimestamps.clear();
         while (tokenizer.hasMoreTokens()){
             int senderId = -1;
@@ -68,6 +65,7 @@ public abstract class LogicClock {
                 int senderTime = Integer.parseInt(s.substring(1, s.length()-1));
                 tempTimestamps.put(senderId, senderTime);
             }
+
         }
     }
 

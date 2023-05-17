@@ -1,14 +1,10 @@
 package dev.oxoo2a.sim4da.clock;
 
-import dev.oxoo2a.sim4da.Network;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 
 
 public class VectorClock extends LogicClock{
     private final HashMap<Integer, Integer> timeVector;
-    public final ClockType type = ClockType.VECTOR;
 
     public VectorClock (int nodeId){
         super(nodeId, ClockType.VECTOR);

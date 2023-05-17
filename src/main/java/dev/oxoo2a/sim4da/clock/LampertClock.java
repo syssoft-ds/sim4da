@@ -11,7 +11,7 @@ public class LampertClock extends LogicClock{
     public void synchronize(String timeStamp) {
         super.synchronize(timeStamp);
         if(this.tempTimestamps.keySet().size()>1){
-            System.err.println("more than one timestamp was extracted from string, should not happen");
+            System.err.println("more than one timestamp was extracted from string, should not happen with lamportClock");
             System.out.println(timeStamp);
         }
         for (Integer senderId : tempTimestamps.keySet()){

@@ -3,7 +3,7 @@ package dev.oxoo2a.sim4da.clock;
 import dev.oxoo2a.sim4da.Message;
 import dev.oxoo2a.sim4da.Network;
 import dev.oxoo2a.sim4da.Node;
-import dev.oxoo2a.sim4da.Node2Simulator;
+
 
 /**
  * Basic Parent class for implementing Nodes using Logic Clocks.
@@ -27,7 +27,6 @@ public class TimedNode extends Node {
         m.getMap().entrySet().removeIf(entry -> entry.getKey().contains("%T"));
 
         if(this.lc instanceof LampertClock){
-            m.getMap().entrySet().removeIf(entry -> entry.getKey().contains("%T"));
             m.add("%T"+ myId, lc.getTime());
             System.out.println("Added [" + myId + "] : [" + lc.getTime()+ "] to message payload");
         }
@@ -39,6 +38,7 @@ public class TimedNode extends Node {
         System.out.println(m);
         this.simulator.sendUnicast(myId,receiver_id, m.toJson());
     }
+
     protected Network.Message receive () {
         lc.tick();
         Network.Message m = simulator.receive(myId);
