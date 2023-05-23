@@ -27,6 +27,10 @@ public class Message {
 
     }
 
+    public void setTimestamp(int timestamp) {
+        this.timestamp = timestamp;
+    }
+
     public String query ( String key ) {
         return content.get(key);
     }
@@ -49,5 +53,9 @@ public class Message {
     }
 
     private final HashMap<String,String> content;
+    private int timestamp;
     private static final Gson serializer = new Gson();
+
+
+
 }

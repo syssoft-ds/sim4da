@@ -1,6 +1,9 @@
 package dev.oxoo2a.sim4da;
 
 import static org.junit.jupiter.api.Assertions.*;
+import dev.oxoo2a.sim4da.LamportClock;
+import dev.oxoo2a.sim4da.VectorClock;
+
 
 import java.beans.Transient;
 
@@ -12,11 +15,19 @@ public class SimulatorTest {
 
     @Test
     public void simpleSimulation() {
-        Simulator s = Simulator.createDefaultSimulator(n_nodes);
+        Simulator s = Simulator.createDefaultSimulator(n_nodes, new LamportClock());
+       // Simulator s = Simulator.createDefaultSimulator(n_nodes, new VectorClock(n_nodes, 0));
+        Tracer tracer = new Tracer("TestTracer", true, true, true, System.out);
+        Network network = new Network(n_nodes, tracer, s.getClock());
+        network.setClock(new LamportClock());
+
+
         for (int id=0; id<n_nodes; id++) {
-            Node n = new BroadcastNode(id);
+            Node n = new BroadcastNode(id,s.getClock(), tracer);
             s.attachNode(id,n);
         }
+        s.setNetwork(network);
+
         try {
             s.runSimulation(duration);
         }
@@ -27,9 +38,10 @@ public class SimulatorTest {
 
     @Test
     public void someNodesNotInstantiated () {
-        Simulator s = Simulator.createDefaultSimulator(n_nodes);
-        s.attachNode(0,new BroadcastNode(0));
-        s.attachNode(1,new BroadcastNode(1));
+        Simulator s = Simulator.createDefaultSimulator(n_nodes, new LamportClock());
+        Tracer tracer = new Tracer("TestTracer", true, true, true, System.out);
+        s.attachNode(0,new BroadcastNode(0, s.getClock(), tracer));
+        s.attachNode(1,new BroadcastNode(1, s.getClock(), tracer));
         assertThrows(InstantiationException.class,() -> {s.runSimulation(duration);});
     }
 }

@@ -6,9 +6,10 @@ import java.util.concurrent.Semaphore;
 
 public class Network {
 
-    public Network ( int n_nodes, Tracer tracer ) {
+    public Network ( int n_nodes, Tracer tracer, Clock clock) {
         this.n_nodes = n_nodes;
         this.tracer = tracer;
+        this.clock = clock;
         mqueues = new MessageQueue[n_nodes];
         for (int i=0; i<n_nodes; ++i)
             mqueues[i] = new MessageQueue();
@@ -21,22 +22,32 @@ public class Network {
     public enum MessageType { UNICAST, BROADCAST }
 
     public class Message {
-        public Message(int sender_id, int receiver_id, MessageType type, String payload ) {
+
+        public Message(int sender_id, int receiver_id, MessageType type, String payload) {
             this.sender_id = sender_id;
             this.receiver_id = receiver_id;
             this.type = type;
             this.payload = payload;
+            this.timestamp = clock.getTime();
+
         }
+
         public int sender_id;
         public int receiver_id;
         public MessageType type;
         public String payload;
+        public int timestamp;
+
 
         public String toString () {
             String r = "Network::Message(sender="+sender_id+",receiver="+receiver_id+",";
             r += type == MessageType.BROADCAST ? "Broadcast" : "Unicast";
-            r += ",payload=<"+payload+">)";
+            r += ",payload=<"+payload+">,timestamp=" + timestamp + ")";
             return r;
+        }
+
+        public int getTimestamp() {
+            return  timestamp;
         }
     }
 
@@ -71,7 +82,7 @@ public class Network {
                         }
                     }
                 }
-                catch (InterruptedException e) {};
+                catch (InterruptedException e) {}
             }
         }
 
@@ -83,6 +94,9 @@ public class Network {
         private final LinkedList<Message> queue;
         private final Semaphore await_message;
         private boolean stop;
+    }
+    public void setClock(Clock clock) {
+        this.clock = clock;
     }
 
     public void unicast ( int sender_id, int receiver_id, String message ) {
@@ -134,7 +148,7 @@ public class Network {
     private final int n_nodes;
     private final Tracer tracer;
     private final MessageQueue[] mqueues;
-
+    private Clock clock;
     private static final Random rgen = new Random();
 
     //private static Logger logger = Logger.getRootLogger();
