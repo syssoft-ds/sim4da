@@ -1,12 +1,18 @@
 package dev.oxoo2a.sim4da;
 
 import java.util.Random;
+import dev.oxoo2a.sim4da.Tracer;
+
+
 
 public class BroadcastNode extends Node {
+    private Tracer tracer;
+
     // The superclass needs its ID
-    public BroadcastNode ( int id ) {
-        super(id);
+    public BroadcastNode ( int id, Clock clock, Tracer tracer) {
+        super(id, clock, tracer);
     }
+
 
     public void main () {
         Random r = new Random();
@@ -14,11 +20,11 @@ public class BroadcastNode extends Node {
         int broadcasts_sent = 0;
         int loops = 0;
         // Create a message with a random candidate to send the next broadcast
-        Message m_broadcast = new Message().add("Sender",myId).add("Candidate",r.nextInt(numberOfNodes()));
+        Message m_broadcast = new Message().add("Sender",getId()).add("Candidate",r.nextInt(numberOfNodes()));
         sendBroadcast(m_broadcast);
         while (stillSimulating()) {
             loops++;
-            emit("Node %d, Loop %d",myId,loops);
+            emit("Node %d, Loop %d",getId(),loops);
             Network.Message m_raw = receive();
             if (m_raw == null) break; // Null == Node2Simulator time ends while waiting for a message
             broadcasts_received++;
@@ -34,8 +40,10 @@ public class BroadcastNode extends Node {
                 m_broadcast.add("Candidate",r.nextInt(numberOfNodes()));
                 sendBroadcast(m_broadcast);
                 broadcasts_sent++;
+
+                clock.updateClock(m_raw.getTimestamp());
             }
         }
-        emit("%d: %d broadcasts received and %d broadcasts sent",myId,broadcasts_received,broadcasts_sent);
+        tracer.emit("%d: %d broadcasts received and %d broadcasts sent",getId(),broadcasts_received,broadcasts_sent);
     }
 }

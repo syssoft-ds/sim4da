@@ -5,21 +5,32 @@ import java.io.PrintStream;
 
 public class Simulator implements Node2Simulator {
 
-    public static Simulator createDefaultSimulator ( int n_nodes ) {
-        return new Simulator(n_nodes, "sim4da", true, true, true, System.out);
+    public static Simulator createDefaultSimulator ( int n_nodes, Clock clock ) {
+        return new Simulator(n_nodes, "sim4da", true, true, true, System.out, clock);
     }
 
-    public static Simulator createSimulator_Log4j2 ( int n_nodes ) {
-        return new Simulator(n_nodes,"sim4da", true,true,true,null);
+    public static Simulator createSimulator_Log4j2 ( int n_nodes, Clock clock ) {
+        return new Simulator(n_nodes,"sim4da", true,true,true,null, clock);
     }
 
-    public Simulator ( int n_nodes, String name, boolean ordered, boolean enableTracing, boolean useLog4j2, PrintStream alternativeDestination ) {
+    public Simulator ( int n_nodes, String name, boolean ordered, boolean enableTracing, boolean useLog4j2, PrintStream alternativeDestination, Clock clock) {
         this.n_nodes = n_nodes;
         tracer = new Tracer(name,ordered,enableTracing,useLog4j2,alternativeDestination);
-        network = new Network(n_nodes,tracer);
+        network = new Network(n_nodes,tracer, clock);
         nodes = new HashMap<Integer, Simulator2Node>(n_nodes);
+        // this.clock = clock; //Lamport Clock
+        this.clock = null; // Vector Clock
         for (int n_id = 0; n_id < n_nodes; ++n_id)
             nodes.put(n_id, null);
+    }
+
+    @Override
+    public void setClock(Clock clock) {
+        this.clock = clock; //setting instance for Vector Clock implementation
+
+    }
+    Clock getClock() {
+        return clock;
     }
 
     @Override
@@ -31,7 +42,9 @@ public class Simulator implements Node2Simulator {
         if ((0 <= id) && (id < n_nodes))
             nodes.replace(id,node);
     }
-
+    public void setNetwork(Network network) {
+        this.network = network;
+    }
     public void runSimulation ( int duration ) throws InstantiationException {
         // Check that all nodes are attached
         for ( Simulator2Node n : nodes.values() ) {
@@ -94,7 +107,8 @@ public class Simulator implements Node2Simulator {
 
     private final int n_nodes;
     private final Tracer tracer;
-    private final Network network;
+    private Network network;
     private final HashMap<Integer, Simulator2Node> nodes;
+    private Clock clock;
     private boolean is_simulating = false;
 }
