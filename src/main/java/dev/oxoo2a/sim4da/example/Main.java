@@ -1,17 +1,25 @@
-package dev.oxoo2a.sim4da;
+package dev.oxoo2a.sim4da.example;
 
+import dev.oxoo2a.sim4da.Node;
+import dev.oxoo2a.sim4da.Simulator;
 import dev.oxoo2a.sim4da.clock.ClockType;
 
 public class Main {
     public static void main(String[] args) {
         int n_nodes = 5;
         Simulator s = Simulator.createDefaultSimulator(n_nodes);
+
+        // Define ClockType for all Nodes.
+        ClockType clockType = ClockType.LAMPORT;
+
         for (int id=0; id<n_nodes; id++) {
-            Node n = new TimedTokenRingNode(id, ClockType.LAMPORT);
+            //TimedTokenRingNode extends TimedNode -> Constructor expects ClockType
+            Node n = new TimedTokenRingNode(id, clockType);
             s.attachNode(id,n);
         }
+
         try{
-            s.runSimulation(3);
+            s.runSimulation(1);
         }catch (InstantiationException e){
             System.err.println("Instantiation failed. Time to investigate.");
         }

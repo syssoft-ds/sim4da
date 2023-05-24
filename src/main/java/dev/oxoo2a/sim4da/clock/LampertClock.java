@@ -10,12 +10,15 @@ public class LampertClock extends LogicClock{
     @Override
     public void synchronize(String timeStamp) {
         super.synchronize(timeStamp);
+
+
         if(this.tempTimestamps.keySet().size()>1){
             System.err.println("more than one timestamp was extracted from string, should not happen with lamportClock");
             System.out.println(timeStamp);
         }
         for (Integer senderId : tempTimestamps.keySet()){
             this.time = Math.max(this.time, tempTimestamps.get(senderId));
+            System.out.println("Clock of Node " + this.nodeId + " was synced to " + time);
         }
     }
 

@@ -22,6 +22,8 @@ public class TimedNode extends Node {
     protected void sendUnicast ( int receiver_id, Message m ) {
 
         this.lc.tick();
+        System.out.println("Sending message. Clock of Node "+ this.myId + " ticked to " +this.lc.getTime());
+
 
         // clear all entries from message containing the timestamp identifier '%T'.
         m.getMap().entrySet().removeIf(entry -> entry.getKey().contains("%T"));
@@ -35,13 +37,15 @@ public class TimedNode extends Node {
                 m.add("%T"+id, ((VectorClock) lc).getTimeVector().get(id));
             }
         }
-        System.out.println(m);
         this.simulator.sendUnicast(myId,receiver_id, m.toJson());
     }
 
     protected Network.Message receive () {
-        lc.tick();
+
         Network.Message m = simulator.receive(myId);
+
+        lc.tick();
+        System.out.println("received message. Clock of Node "+ this.myId + " ticked to " +this.lc.getTime());
 
         // synchronisation of clocks
         if(m != null){

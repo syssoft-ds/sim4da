@@ -1,5 +1,7 @@
-package dev.oxoo2a.sim4da;
+package dev.oxoo2a.sim4da.example;
 
+import dev.oxoo2a.sim4da.Message;
+import dev.oxoo2a.sim4da.Network;
 import dev.oxoo2a.sim4da.clock.ClockType;
 import dev.oxoo2a.sim4da.clock.TimedNode;
 
@@ -21,12 +23,14 @@ public class TimedTokenRingNode extends TimedNode {
             sendUnicast(1, m);
             m.add("%T"+myId, 0);
             System.out.println("sending Message");
-            System.out.println(m);
         }
         while (true){
             Network.Message m_raw = receive();
 
-            if(m_raw == null) break;
+            if(m_raw == null){
+                System.out.println("Message contents empty. Node dies.");
+                break;
+            }
 
             m = Message.fromJson(m_raw.payload);
             int counter = Integer.parseInt(m.query("counter"));

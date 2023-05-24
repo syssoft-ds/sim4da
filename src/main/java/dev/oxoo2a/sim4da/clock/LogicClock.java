@@ -30,9 +30,9 @@ public abstract class LogicClock {
     }
 
     /**
-     * Parent Method to synchronize a Clock with a Time String as received in a Message.
+     * Parent Method to synchronize a Clock with a Time String as received in a Message (raw payload).
      * synchronize() utilizes String Tokenization to extract all Timestamps from the Payload string. A Timestamp in the
-     * Payload always leads with the Characters '%T'.
+     * Payload always leads with the Characters '%T' + NodeID.
      * The IDs and Times are saved in a Hashmap 'tempTimestamps' that is cleared with every new call of the method.
      * tempTimestamps is used in the child class method to access all timestamps. When using Lamport time,
      * the tempTimestamps Map always contains exactly one entry.
@@ -65,7 +65,6 @@ public abstract class LogicClock {
                 int senderTime = Integer.parseInt(s.substring(1, s.length()-1));
                 tempTimestamps.put(senderId, senderTime);
             }
-
         }
     }
 
