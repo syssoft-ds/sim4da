@@ -17,9 +17,12 @@ public class LampertClock extends LogicClock{
             System.out.println(timeStamp);
         }
         for (Integer senderId : tempTimestamps.keySet()){
+            System.out.println("Node " + this.nodeId + " syncing " + this.getTime()  + " with "+ tempTimestamps.get(senderId));
+
+
             this.time = Math.max(this.time, tempTimestamps.get(senderId));
-            System.out.println("Clock of Node " + this.nodeId + " was synced to " + time);
         }
+
     }
 
 
@@ -34,6 +37,10 @@ public class LampertClock extends LogicClock{
         return type;
     }
 
+    @Override
+    protected void printTimeStamps(){
+        System.out.println("TimeStampts of Node " + this.nodeId + " | Time " + this.time);
+    }
 
     public int getTime() {
         return time;

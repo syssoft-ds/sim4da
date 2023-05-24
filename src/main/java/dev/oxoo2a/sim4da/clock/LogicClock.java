@@ -25,6 +25,8 @@ public abstract class LogicClock {
     public ClockType getType(){
         return this.type;
     }
+
+
     public void tick(){
         this.time++;
     }
@@ -66,8 +68,9 @@ public abstract class LogicClock {
                 tempTimestamps.put(senderId, senderTime);
             }
         }
-    }
 
+    }
+    protected void printTimeStamps(){}
     public int getTime(){
         return this.time;
     }

@@ -25,6 +25,13 @@ public class TimedTokenRingNode extends TimedNode {
             System.out.println("sending Message");
         }
         while (true){
+            /*
+            long startTime = System.currentTimeMillis();
+            long delayTime = 100; // 2000 milliseconds = 2 seconds
+            while (System.currentTimeMillis() - startTime < delayTime) {
+                // This loop will keep executing until the specified delay time has elapsed
+            }
+             */
             Network.Message m_raw = receive();
 
             if(m_raw == null){
@@ -39,5 +46,7 @@ public class TimedTokenRingNode extends TimedNode {
             m.add("counter", counter);
             sendUnicast((myId + 1) % numberOfNodes(),m);
         }
+        emit("Node %d ended with internal timestamp %d", this.myId, this.getLc().getTime());
+
     }
 }

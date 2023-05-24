@@ -6,7 +6,7 @@ import dev.oxoo2a.sim4da.Node;
 
 
 /**
- * Basic Parent class for implementing Nodes using Logic Clocks.
+ * Basic Parent class for implementing Nodes with Logic Clocks.
  * Time keeping is handled in send and receive methods using an Instance of LogicClock for each Node.
  * Sending includes adding the nodes timestamp according to the used ClockType.
  * Receiving includes parsing the time Information and updating a node's timestamp (synchronize(), see LogicClock.java)
@@ -22,7 +22,7 @@ public class TimedNode extends Node {
     protected void sendUnicast ( int receiver_id, Message m ) {
 
         this.lc.tick();
-        System.out.println("Sending message. Clock of Node "+ this.myId + " ticked to " +this.lc.getTime());
+        emit("%d ticked to %d",this.myId ,this.lc.getTime());
 
 
         // clear all entries from message containing the timestamp identifier '%T'.
@@ -30,13 +30,17 @@ public class TimedNode extends Node {
 
         if(this.lc instanceof LampertClock){
             m.add("%T"+ myId, lc.getTime());
-            System.out.println("Added [" + myId + "] : [" + lc.getTime()+ "] to message payload");
         }
         if(this.lc instanceof VectorClock){
             for (Integer id: ((VectorClock) lc).getTimeVector().keySet()){
                 m.add("%T"+id, ((VectorClock) lc).getTimeVector().get(id));
             }
         }
+        if(this.lc instanceof VectorClock){
+            ((VectorClock) this.lc).printVectorLine(((VectorClock) this.lc).getTimeVector());
+        }
+        System.out.println();
+
         this.simulator.sendUnicast(myId,receiver_id, m.toJson());
     }
 
@@ -45,14 +49,20 @@ public class TimedNode extends Node {
         Network.Message m = simulator.receive(myId);
 
         lc.tick();
-        System.out.println("received message. Clock of Node "+ this.myId + " ticked to " +this.lc.getTime());
+        emit("%d ticked to %d",this.myId ,this.lc.getTime());
 
         // synchronisation of clocks
         if(m != null){
             this.lc.synchronize(m.payload);
         }
 
+
         return m;
+    }
+
+
+    public LogicClock getLc() {
+        return lc;
     }
 
     @Override

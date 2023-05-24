@@ -9,12 +9,9 @@ public class Main {
         int n_nodes = 5;
         Simulator s = Simulator.createDefaultSimulator(n_nodes);
 
-        // Define ClockType for all Nodes.
-        ClockType clockType = ClockType.LAMPORT;
-
         for (int id=0; id<n_nodes; id++) {
             //TimedTokenRingNode extends TimedNode -> Constructor expects ClockType
-            Node n = new TimedTokenRingNode(id, clockType);
+            Node n = new TimedTokenRingNode(id, ClockType.VECTOR);
             s.attachNode(id,n);
         }
 
