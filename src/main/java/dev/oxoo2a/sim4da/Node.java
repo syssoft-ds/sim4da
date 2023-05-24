@@ -2,20 +2,14 @@ package dev.oxoo2a.sim4da;
 
 public abstract class Node implements Simulator2Node {
 
-    enum ClockType{ LAMPORT, VECTOR}
-
     public Node ( int my_id ) {
         clock = new LamportClock();
         this.myId = my_id;
         t_main = new Thread(this::main);
     }
 
-    public Node ( int my_id, ClockType clockType ) {
-        if (clockType == ClockType.VECTOR) {
-            clock = null;
-        } else {
-            clock = new LamportClock();
-        }
+    public Node ( int my_id, Clock clock ) {
+        this.clock = clock;
         this.myId = my_id;
         t_main = new Thread(this::main);
     }
@@ -57,8 +51,8 @@ public abstract class Node implements Simulator2Node {
     }
 
     protected void sendBroadcast ( Message m ) {
-        if (clock != null)
-            clock.increase();
+        clock.increase();
+        m.add("Time", clock.getTime());
         simulator.sendBroadcast(myId,m.toJson());
     }
 

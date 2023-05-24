@@ -9,7 +9,7 @@ public class TokenRingNode extends Node{
         super(my_id);
     }
 
-    public TokenRingNode( int my_id, ClockType clockType ) { super(my_id, clockType);}
+    public TokenRingNode( int my_id, Clock clock ) { super(my_id, clock);}
 
     @Override
     protected void main() {
