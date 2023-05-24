@@ -2,7 +2,20 @@ package dev.oxoo2a.sim4da;
 
 public abstract class Node implements Simulator2Node {
 
+    enum ClockType{ LAMPORT, VECTOR}
+
     public Node ( int my_id ) {
+        clock = new LamportClock();
+        this.myId = my_id;
+        t_main = new Thread(this::main);
+    }
+
+    public Node ( int my_id, ClockType clockType ) {
+        if (clockType == ClockType.VECTOR) {
+            clock = null;
+        } else {
+            clock = new LamportClock();
+        }
         this.myId = my_id;
         t_main = new Thread(this::main);
     }
@@ -34,6 +47,8 @@ public abstract class Node implements Simulator2Node {
     }
 
     protected void sendUnicast ( int receiver_id, Message m ) {
+        clock.increase();
+        m.add("Time", clock.getTime());
         simulator.sendUnicast(myId,receiver_id, m.toJson());
     }
 
@@ -42,16 +57,27 @@ public abstract class Node implements Simulator2Node {
     }
 
     protected void sendBroadcast ( Message m ) {
+        if (clock != null)
+            clock.increase();
         simulator.sendBroadcast(myId,m.toJson());
     }
 
     protected Network.Message receive () {
-        return simulator.receive(myId);
+        Network.Message m = simulator.receive(myId);
+        if (m != null) {
+            String timeBefore = clock.getTime();
+            clock.synchronize(m);
+            String timeAfter = clock.getTime();
+            emit("Node %d: received - before: %s -> after: %s.", myId, timeBefore, timeAfter);
+        }
+        return m;
     }
 
     protected void emit ( String format, Object ... args ) {
-        simulator.emit(format,args);
+        simulator.emit(format, args);
     }
+
+
     // Module implements basic node functionality
     protected abstract void main ();
 
@@ -64,6 +90,7 @@ public abstract class Node implements Simulator2Node {
     }
 
     protected final int myId;
+    public Clock clock;
     private Node2Simulator simulator;
     private final Thread t_main;
 }
