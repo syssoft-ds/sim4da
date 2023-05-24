@@ -2,8 +2,8 @@ package dev.oxoo2a.sim4da;
 
 public abstract class Node implements Simulator2Node {
 
-    public Node ( int my_id, Clock clock, Tracer tracer) {
-        this.id = id;
+    public Node ( int my_id, VectorClock clock, Tracer tracer) {
+        this.id = my_id;
         this.myId = my_id;
         this.clock = clock;
         t_main = new Thread(this::main);
@@ -70,7 +70,7 @@ public abstract class Node implements Simulator2Node {
     }
     // Module implements basic node functionality
     protected abstract void main ();
-    public void setClock(Clock clock) {
+    public void setClock(VectorClock clock) {
         this.clock = clock;
     }
 
