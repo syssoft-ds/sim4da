@@ -9,26 +9,38 @@ public class Network {
     public Network ( int n_nodes, Tracer tracer, Clock clock) {
         this.n_nodes = n_nodes;
         this.tracer = tracer;
-        this.clock = clock;
+       setClock(clock);
         mqueues = new MessageQueue[n_nodes];
         for (int i=0; i<n_nodes; ++i)
             mqueues[i] = new MessageQueue();
     }
 
+
     public int numberOfNodes () {
         return n_nodes;
     }
+
+    public void setClock(Clock clock) {
+        this.clock = clock;
+    }
+
 
     public enum MessageType { UNICAST, BROADCAST }
 
     public class Message {
 
-        public Message(int sender_id, int receiver_id, MessageType type, String payload) {
+        public Message(int sender_id, int receiver_id, MessageType type, String payload, Clock clock) {
             this.sender_id = sender_id;
             this.receiver_id = receiver_id;
             this.type = type;
             this.payload = payload;
-            this.timestamp = clock.getTime();
+            if (clock != null) {
+                this.timestamp = clock.getTime();
+            } else {
+                // Handle the case when clock is null
+               this.timestamp = -1; // Set a default value or throw an exception
+
+            }
 
         }
 
@@ -95,21 +107,19 @@ public class Network {
         private final Semaphore await_message;
         private boolean stop;
     }
-    public void setClock(Clock clock) {
-        this.clock = clock;
-    }
 
     public void unicast ( int sender_id, int receiver_id, String message ) {
         if ((receiver_id < 0) || (receiver_id >= n_nodes)) {
             System.err.printf("Network::unicast: unknown receiver id %d\n",receiver_id);
             return;
+
         }
         if ((sender_id < 0) || (sender_id >= n_nodes)) {
             System.err.printf("Network::unicast: unknown sender id %d\n",sender_id);
             return;
         }
         tracer.emit("Unicast:%d->%d",sender_id,receiver_id);
-        Message raw = new Message(sender_id,receiver_id,MessageType.UNICAST,message);
+        Message raw = new Message(sender_id,receiver_id,MessageType.UNICAST,message, clock);
         mqueues[receiver_id].put(raw);
     }
 
@@ -119,7 +129,7 @@ public class Network {
             return;
         }
         tracer.emit("Broadcast:%d->0..%d",sender_id,n_nodes-1);
-        Message raw = new Message(sender_id,-1,MessageType.BROADCAST,message);
+        Message raw = new Message(sender_id,-1,MessageType.BROADCAST,message, clock);
         for ( int l=0; l<n_nodes; ++l) {
             if (l == sender_id) continue;
             raw.receiver_id = l;
