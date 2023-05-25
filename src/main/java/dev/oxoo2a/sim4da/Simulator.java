@@ -63,27 +63,27 @@ public class Simulator implements Node2Simulator {
     }
 
     @Override
-    public void sendUnicast(int sender_id, int receiver_id, String m) {
-        network.unicast(sender_id,receiver_id,m);
+    public void sendUnicast(int sender_id, int receiver_id,int lamportTime_id,int[]vectorTime, String m) {
+        network.unicast(sender_id,receiver_id,lamportTime_id,vectorTime,m);
     }
 
     @Override
-    public void sendUnicast ( int sender_id, int receiver_id, Message m ) {
-        network.unicast(sender_id,receiver_id,m.toJson());
+    public void sendUnicast ( int sender_id, int receiver_id,int lamportTime_id,int[]vectorTime, Message m ) {
+        network.unicast(sender_id,receiver_id,lamportTime_id,vectorTime,m.toJson());
     }
 
     @Override
-    public void sendBroadcast ( int sender_id, String m ) {
-        network.broadcast(sender_id,m);
+    public void sendBroadcast ( int sender_id, int lamportTime_id,int[]vectorTime, String m ) {
+        network.broadcast(sender_id,lamportTime_id,vectorTime,m);
     }
 
     @Override
-    public void sendBroadcast ( int sender_id, Message m ) {
-        network.broadcast(sender_id,m.toJson());
+    public void sendBroadcast ( int sender_id,int lamportTime_id, int[]vectorTime, Message m ) {
+        network.broadcast(sender_id,lamportTime_id,vectorTime,m.toJson());
     }
 
     @Override
-    public Network.Message receive ( int receiver_id ) {
+    public Network.Message receive ( int receiver_id) {
         return network.receive(receiver_id);
     }
 

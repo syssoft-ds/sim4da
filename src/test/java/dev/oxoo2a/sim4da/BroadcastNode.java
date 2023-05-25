@@ -16,12 +16,14 @@ public class BroadcastNode extends Node {
         // Create a message with a random candidate to send the next broadcast
         Message m_broadcast = new Message().add("Sender",myId).add("Candidate",r.nextInt(numberOfNodes()));
         sendBroadcast(m_broadcast);
+        printTestTime();
         while (stillSimulating()) {
             loops++;
             emit("Node %d, Loop %d",myId,loops);
             Network.Message m_raw = receive();
             if (m_raw == null) break; // Null == Node2Simulator time ends while waiting for a message
             broadcasts_received++;
+            printTestTime();
             // The following printf shows the elements of Network.Message except the message type unicast or broadcast
             // System.out.printf("%d: from %d, payload=<%s>\n",myId(),m_raw.sender_id,m_raw.payload);
             // JSON encoded messages must be deserialized into a Message object

@@ -21,14 +21,19 @@ public class Network {
     public enum MessageType { UNICAST, BROADCAST }
 
     public class Message {
-        public Message(int sender_id, int receiver_id, MessageType type, String payload ) {
+        public Message(int sender_id,  int receiver_id,int lamportTime_id, int[] vectorTime, MessageType type, String payload ) {
             this.sender_id = sender_id;
             this.receiver_id = receiver_id;
+            this.lamportTime_id=lamportTime_id;
+            this.vectorTime= vectorTime;
             this.type = type;
             this.payload = payload;
         }
         public int sender_id;
         public int receiver_id;
+        public int  lamportTime_id;
+
+        public int[] vectorTime;
         public MessageType type;
         public String payload;
 
@@ -38,6 +43,12 @@ public class Network {
             r += ",payload=<"+payload+">)";
             return r;
         }
+
+        public int getLamportTime_id () {
+            return lamportTime_id;
+        }
+
+        public int[] getVectorTime () { return vectorTime;}
     }
 
     private class MessageQueue {
@@ -85,7 +96,7 @@ public class Network {
         private boolean stop;
     }
 
-    public void unicast ( int sender_id, int receiver_id, String message ) {
+    public void unicast ( int sender_id, int receiver_id, int lamportTime_id,int[] vectorTime, String message ) {
         if ((receiver_id < 0) || (receiver_id >= n_nodes)) {
             System.err.printf("Network::unicast: unknown receiver id %d\n",receiver_id);
             return;
@@ -95,17 +106,17 @@ public class Network {
             return;
         }
         tracer.emit("Unicast:%d->%d",sender_id,receiver_id);
-        Message raw = new Message(sender_id,receiver_id,MessageType.UNICAST,message);
+        Message raw = new Message(sender_id,receiver_id,lamportTime_id,vectorTime,MessageType.UNICAST,message);
         mqueues[receiver_id].put(raw);
     }
 
-    public void broadcast ( int sender_id, String message ) {
+    public void broadcast ( int sender_id, int lamportTime_id,int[] vectorTime, String message ) {
         if ((sender_id < 0) || (sender_id >= n_nodes)) {
             System.err.printf("Network::unicast: unknown sender id %d\n",sender_id);
             return;
         }
         tracer.emit("Broadcast:%d->0..%d",sender_id,n_nodes-1);
-        Message raw = new Message(sender_id,-1,MessageType.BROADCAST,message);
+        Message raw = new Message(sender_id,-1,lamportTime_id,vectorTime,MessageType.BROADCAST,message);
         for ( int l=0; l<n_nodes; ++l) {
             if (l == sender_id) continue;
             raw.receiver_id = l;
@@ -124,6 +135,10 @@ public class Network {
             tracer.emit("Receive %s:%d<-%d",m_type,m.receiver_id,m.sender_id);
         }
         return m;
+    }
+
+    public int getLamportTime () {
+        return 0;
     }
 
     public void stop () {
