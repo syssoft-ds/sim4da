@@ -2,8 +2,21 @@ package dev.oxoo2a.sim4da;
 
 import java.util.HashMap;
 import java.io.PrintStream;
+import java.util.Vector;
+
+import dev.oxoo2a.sim4da.LamportClock;
+import dev.oxoo2a.sim4da.VectorClock;
 
 public class Simulator implements Node2Simulator {
+
+    private final int n_nodes;
+    private final Tracer tracer;
+    private final Network network;
+    private final HashMap<Integer, Simulator2Node> nodes;
+    private final LamportClock lamportClock;
+    private final VectorClock vectorClock;
+
+    private boolean is_simulating = false;
 
     public static Simulator createDefaultSimulator ( int n_nodes ) {
         return new Simulator(n_nodes, "sim4da", true, true, true, System.out);
@@ -18,6 +31,8 @@ public class Simulator implements Node2Simulator {
         tracer = new Tracer(name,ordered,enableTracing,useLog4j2,alternativeDestination);
         network = new Network(n_nodes,tracer);
         nodes = new HashMap<Integer, Simulator2Node>(n_nodes);
+        lamportClock = new LamportClock(n_nodes);
+        vectorClock = new VectorClock(n_nodes);
         for (int n_id = 0; n_id < n_nodes; ++n_id)
             nodes.put(n_id, null);
     }
@@ -64,26 +79,47 @@ public class Simulator implements Node2Simulator {
 
     @Override
     public void sendUnicast(int sender_id, int receiver_id, String m) {
+        lamportClock.updateClock(sender_id); // Aktualisierung des Lamport-Zeitstempels
+        lamportClock.getClock(sender_id); //Ausgabe des Lamport-Zeitstempels
+        vectorClock.updateClock(sender_id); // Aktualisierung des Vektor-Zeitstempels
+        vectorClock.getClock(); //Ausgabe des Vektor-Zeitstempels
         network.unicast(sender_id,receiver_id,m);
     }
 
     @Override
     public void sendUnicast ( int sender_id, int receiver_id, Message m ) {
+        lamportClock.updateClock(sender_id); // Aktualisierung des Lamport-Zeitstempels
+        lamportClock.getClock(sender_id); //Ausgabe des Lamport-Zeitstempels
+        vectorClock.updateClock(sender_id); // Aktualisierung des Vektor-Zeitstempels
+        vectorClock.getClock(); //Ausgabe des Vektor-Zeitstempels
         network.unicast(sender_id,receiver_id,m.toJson());
     }
 
     @Override
     public void sendBroadcast ( int sender_id, String m ) {
+        lamportClock.updateClock(sender_id); // Aktualisierung des Lamport-Zeitstempels
+        lamportClock.getClock(sender_id); //Ausgabe des Lamport-Zeitstempels
+        vectorClock.updateClock(sender_id); // Aktualisierung des Vektor-Zeitstempels
+        vectorClock.getClock(); //Ausgabe des Vektor-Zeitstempels
         network.broadcast(sender_id,m);
     }
 
     @Override
     public void sendBroadcast ( int sender_id, Message m ) {
+        lamportClock.updateClock(sender_id); // Aktualisierung des Lamport-Zeitstempels
+        lamportClock.getClock(sender_id); //Ausgabe des Lamport-Zeitstempels
+        vectorClock.updateClock(sender_id); // Aktualisierung des Vektor-Zeitstempels
+        vectorClock.getClock(); //Ausgabe des Vektor-Zeitstempels
         network.broadcast(sender_id,m.toJson());
     }
 
     @Override
     public Network.Message receive ( int receiver_id ) {
+        int sender_id = 1; //Error --> Sender ID muss mit empfangen werden
+        lamportClock.combineClock(receiver_id, sender_id); // Aktualisierung des Lamport-Zeitstempels
+        lamportClock.getClock(receiver_id); //Ausgabe des Lamport-Zeitstempels
+        vectorClock.updateClock(sender_id); // Aktualisierung des Vektor-Zeitstempels
+        vectorClock.getClock(); //Ausgabe des Vektor-Zeitstempels
         return network.receive(receiver_id);
     }
 
@@ -92,9 +128,4 @@ public class Simulator implements Node2Simulator {
         tracer.emit(format,args);
     }
 
-    private final int n_nodes;
-    private final Tracer tracer;
-    private final Network network;
-    private final HashMap<Integer, Simulator2Node> nodes;
-    private boolean is_simulating = false;
 }
