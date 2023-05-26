@@ -1,5 +1,7 @@
 package dev.oxoo2a.sim4da;
 
+import java.util.HashMap;
+
 public interface Node2Simulator {
     int numberOfNodes();
     boolean stillSimulating ();
@@ -8,5 +10,5 @@ public interface Node2Simulator {
     void sendBroadcast ( int sender_id, String m );
     void sendBroadcast ( int sender_id, Message m );
     Network.Message receive ( int my_id );
-    void emit ( String format, Object ... args );
+    void emit ( String format, String logType, Object ... args );
 }
