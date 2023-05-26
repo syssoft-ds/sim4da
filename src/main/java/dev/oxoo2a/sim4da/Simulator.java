@@ -36,6 +36,7 @@ public class Simulator implements Node2Simulator {
         // Check that all nodes are attached
         for ( Simulator2Node n : nodes.values() ) {
             if (n == null) throw new InstantiationException();
+            System.out.println("set simulator");
             n.setSimulator(this);
         }
 
