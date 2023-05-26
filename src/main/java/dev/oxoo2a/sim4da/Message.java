@@ -13,10 +13,10 @@ public class Message {
         content = new HashMap<>();
     }
 
-    protected Message ( HashMap<String,String> content ) {
+    protected Message ( HashMap<String,Object> content ) {
         this.content = content;
     }
-    public Message add ( String key, String value ) {
+    public Message add ( String key, Object value ) {
         content.put(key,value);
         return this;
     }
@@ -27,11 +27,16 @@ public class Message {
 
     }
 
-    public String query ( String key ) {
-        return content.get(key);
+    public void setTimestamp(int timestamp) {
+        this.timestamp = timestamp;
     }
 
-    public Map<String,String> getMap () {
+    public String query ( String key ) {
+       Object value = content.get(key);
+       return (value != null) ? value.toString() : null;
+    }
+
+    public Map<String,Object> getMap () {
         return content;
     }
 
@@ -40,14 +45,18 @@ public class Message {
     }
 
     public static Message fromJson ( String s ) {
-        Type contentType = new TypeToken<HashMap<String,String>>() {}.getType();
+        Type contentType = new TypeToken<HashMap<String,Object>>() {}.getType();
         return new Message(serializer.fromJson(s,contentType));
     }
 
-    private static synchronized String serialize ( Map<String,String> content ) {
+    private static synchronized String serialize ( Map<String,Object> content ) {
         return serializer.toJson(content); // Not sure about thread safety of Gson
     }
 
-    private final HashMap<String,String> content;
+    private final HashMap<String,Object> content;
+    private int timestamp;
     private static final Gson serializer = new Gson();
+
+
+
 }

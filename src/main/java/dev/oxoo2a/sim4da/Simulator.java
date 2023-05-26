@@ -1,25 +1,42 @@
 package dev.oxoo2a.sim4da;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.io.PrintStream;
 
 public class Simulator implements Node2Simulator {
 
-    public static Simulator createDefaultSimulator ( int n_nodes ) {
-        return new Simulator(n_nodes, "sim4da", true, true, true, System.out);
+    public static Simulator createDefaultSimulator(int n_nodes) {
+        Simulator simulator = new Simulator(n_nodes, "sim4da", true, true, true, System.out);
+        for (int id = 0; id < n_nodes; id++) {
+            VectorClock clock = new VectorClock(n_nodes, id, 0);
+            simulator.attachNode(id, new TokenRingNode(id, clock, simulator.getTracer()));
+            simulator.setClock(clock);
+        }
+        return simulator;
     }
 
-    public static Simulator createSimulator_Log4j2 ( int n_nodes ) {
-        return new Simulator(n_nodes,"sim4da", true,true,true,null);
+    public static Simulator createSimulator_Log4j2(int n_nodes) {
+        return new Simulator(n_nodes, "sim4da", true, true, true, null);
     }
 
-    public Simulator ( int n_nodes, String name, boolean ordered, boolean enableTracing, boolean useLog4j2, PrintStream alternativeDestination ) {
+    public Simulator(int n_nodes, String name, boolean ordered, boolean enableTracing, boolean useLog4j2, PrintStream alternativeDestination) {
         this.n_nodes = n_nodes;
-        tracer = new Tracer(name,ordered,enableTracing,useLog4j2,alternativeDestination);
-        network = new Network(n_nodes,tracer);
+        tracer = new Tracer(name, ordered, enableTracing, useLog4j2, alternativeDestination);
+        network = new Network(n_nodes, tracer, clock);
         nodes = new HashMap<Integer, Simulator2Node>(n_nodes);
         for (int n_id = 0; n_id < n_nodes; ++n_id)
             nodes.put(n_id, null);
+    }
+
+    @Override
+    public void setClock(VectorClock clock) {
+        this.clock = clock; //setting instance for Vector Clock implementation
+        emit("Clock type set to: %s", clock.getClass().getSimpleName()); //logging statement to display clock type
+    }
+
+    public Clock getClock() {
+        return clock;
     }
 
     @Override
@@ -27,19 +44,35 @@ public class Simulator implements Node2Simulator {
         return n_nodes;
     }
 
-    public void attachNode (int id, Simulator2Node node ) {
+    public void attachNode(int id, Simulator2Node node) {
         if ((0 <= id) && (id < n_nodes))
-            nodes.replace(id,node);
+            nodes.replace(id, node);
+
+        VectorClock clock = (VectorClock) this.clock; // Cast the clock to VectorClock
+        node.setClock(clock);
+
+
     }
 
-    public void runSimulation ( int duration ) throws InstantiationException {
+    public void setNetwork(Network network) {
+        this.network = network;
+        network.setClock(clock);
+    }
+
+    public void runSimulation(int duration) throws InstantiationException {
         // Check that all nodes are attached
-        for ( Simulator2Node n : nodes.values() ) {
-            if (n == null) throw new InstantiationException();
+        for (Simulator2Node n : nodes.values()) {
+            if (n == null) {
+                throw new InstantiationException("Node not attached.");
+            }
+
             n.setSimulator(this);
+
         }
 
         tracer.emit("Simulator::runSimulation with %d nodes for %d seconds",n_nodes,duration);
+        emit("Initial clock values: %s", Arrays.toString(clock.getValues())); //Logging statement to display initial clock value
+
         is_simulating = true;
         nodes.values().forEach(Simulator2Node::start);
         // Wait for the required duration
@@ -49,6 +82,8 @@ public class Simulator implements Node2Simulator {
         catch (InterruptedException ignored) {}
         is_simulating = false;
 
+        emit("Final clock values: %s", Arrays.toString(clock.getValues())); //logging statement to display final clock values
+
         // Stop network - release nodes waiting in receive ...
         network.stop();
 
@@ -56,6 +91,7 @@ public class Simulator implements Node2Simulator {
         nodes.values().forEach(Simulator2Node::stop);
         tracer.emit("Simulator::runSimulation finished");
     }
+
 
     @Override
     public boolean stillSimulating() {
@@ -90,11 +126,19 @@ public class Simulator implements Node2Simulator {
     @Override
     public void emit ( String format, Object ... args ) {
         tracer.emit(format,args);
+
+        //emit("Clock values: %s", Arrays.toString(clock.getValues())); //logging statement to display clock values
     }
 
+    public Tracer getTracer(){
+        return tracer;
+    }
     private final int n_nodes;
     private final Tracer tracer;
-    private final Network network;
+    private Network network;
     private final HashMap<Integer, Simulator2Node> nodes;
+
+    private VectorClock clock;
     private boolean is_simulating = false;
 }
+

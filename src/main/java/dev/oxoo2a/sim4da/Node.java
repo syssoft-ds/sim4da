@@ -2,9 +2,17 @@ package dev.oxoo2a.sim4da;
 
 public abstract class Node implements Simulator2Node {
 
-    public Node ( int my_id ) {
+    public Node ( int my_id, VectorClock clock, Tracer tracer) {
+        this.id = my_id;
         this.myId = my_id;
+        this.clock = clock;
         t_main = new Thread(this::main);
+    }
+
+
+
+    public int getId() {
+        return id;
     }
 
     @Override
@@ -33,8 +41,10 @@ public abstract class Node implements Simulator2Node {
         simulator.sendUnicast(myId,receiver_id,m);
     }
 
-    protected void sendUnicast ( int receiver_id, Message m ) {
+    protected void sendUnicast ( int receiver_id, Message m, int timestamp ) {
+        m.setTimestamp(timestamp);
         simulator.sendUnicast(myId,receiver_id, m.toJson());
+        clock.increment();
     }
 
     protected void sendBroadcast ( String m ) {
@@ -46,7 +56,13 @@ public abstract class Node implements Simulator2Node {
     }
 
     protected Network.Message receive () {
-        return simulator.receive(myId);
+        Network.Message m = simulator.receive(myId);
+
+        if (m != null) {
+            int timestamp = m.timestamp;
+            clock.updateClock(timestamp);
+        }
+        return m;
     }
 
     protected void emit ( String format, Object ... args ) {
@@ -54,6 +70,9 @@ public abstract class Node implements Simulator2Node {
     }
     // Module implements basic node functionality
     protected abstract void main ();
+    public void setClock(VectorClock clock) {
+        this.clock = clock;
+    }
 
     @Override
     public void stop () {
@@ -62,8 +81,9 @@ public abstract class Node implements Simulator2Node {
         }
         catch (InterruptedException ignored) {};
     }
-
+    protected Clock clock;
     protected final int myId;
     private Node2Simulator simulator;
     private final Thread t_main;
+    private int id;
 }
