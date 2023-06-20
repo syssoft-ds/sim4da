@@ -5,12 +5,13 @@ import dev.oxoo2a.sim4da.logicalClocks.VectorClockNode;
 
 public class Main {
 
+    public static  int n_nodes = 5;
     public static void main(String[] args) {
 
 
-        int n_nodes = 5;
 
-        ClockTypeToUse clockTypeToUse = ClockTypeToUse.lamportClock;
+
+        ClockTypeToUse clockTypeToUse = ClockTypeToUse.vectorClock;
 
         Simulator s = Simulator.createDefaultSimulator(n_nodes);
         /*for (int id=0; id<n_nodes; id++) {
@@ -36,7 +37,7 @@ public class Main {
 
 
         try{
-            s.runSimulation(5);
+            s.runSimulation(10000000);
         }catch (InstantiationException e){
             System.err.println("Instantiation failed. Time to investigate.");
         }
