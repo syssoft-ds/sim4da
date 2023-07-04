@@ -2,8 +2,6 @@ package dev.oxoo2a.sim4da.termination;
 
 import dev.oxoo2a.sim4da.Node;
 import dev.oxoo2a.sim4da.Simulator;
-import dev.oxoo2a.sim4da.clock.ClockType;
-import dev.oxoo2a.sim4da.example.TimedTokenRingNode;
 
 public class Main {
     static int n_nodes = 5;
@@ -15,7 +13,7 @@ public class Main {
         Simulator s = Simulator.createDefaultSimulator(n_nodes);
 
         for (int id=0; id<n_nodes; id++) {
-            Node n = new TokenRingNode(id);
+            Node n = new ProbabilisticNode(id);
             s.attachNode(id,n);
         }
 

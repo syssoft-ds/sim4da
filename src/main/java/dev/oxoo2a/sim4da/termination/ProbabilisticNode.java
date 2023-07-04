@@ -6,9 +6,9 @@ import dev.oxoo2a.sim4da.Node;
 
 import java.util.Random;
 
-public class TokenRingNode extends Node {
+public class ProbabilisticNode extends Node {
     boolean active;
-    public TokenRingNode(int my_id) {
+    public ProbabilisticNode(int my_id) {
         super(my_id);
         active = true;
     }
