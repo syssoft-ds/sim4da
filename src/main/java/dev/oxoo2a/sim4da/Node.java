@@ -2,8 +2,11 @@ package dev.oxoo2a.sim4da;
 
 public abstract class Node implements Simulator2Node {
 
-    public Node ( int my_id ) {
+    private boolean trackClock = false;
+
+    public Node ( int my_id, boolean trackClock ) {
         clock = new LamportClock();
+        this.trackClock = trackClock;
         this.myId = my_id;
         t_main = new Thread(this::main);
     }
@@ -11,6 +14,7 @@ public abstract class Node implements Simulator2Node {
     public Node ( int my_id, Clock clock ) {
         this.clock = clock;
         this.myId = my_id;
+        this.trackClock = true;
         t_main = new Thread(this::main);
     }
 
@@ -62,7 +66,8 @@ public abstract class Node implements Simulator2Node {
             String timeBefore = clock.getTime();
             clock.synchronize(m);
             String timeAfter = clock.getTime();
-            emit("Node %d: received - before: %s -> after: %s.", myId, timeBefore, timeAfter);
+            if (trackClock)
+                emit("Node %d: received - before: %s -> after: %s.", myId, timeBefore, timeAfter);
         }
         return m;
     }

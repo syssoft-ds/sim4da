@@ -8,7 +8,13 @@ public class Main {
         Simulator s = Simulator.createDefaultSimulator(n_nodes);
 
         for (int id=0; id<n_nodes; id++) {
-            TokenRingNode n = new TokenRingNode(id, new VectorClock(id, n_nodes));
+            /*
+            // u1, sending messages and tracking time withLamport or Vertex Clock
+            TokenRingNode n = new TokenRingNode(id, new LamportClock());
+            */
+
+            // u2 sending messages with Actors and detect termination
+            Actor n = new Actor(id);
             s.attachNode(id,n);
         }
 

@@ -6,7 +6,7 @@ public class TokenRingNode extends Node{
 
     private int workTimes = 0;
     public TokenRingNode(int my_id) {
-        super(my_id);
+        super(my_id, true);
     }
 
     public TokenRingNode( int my_id, Clock clock ) { super(my_id, clock);}
