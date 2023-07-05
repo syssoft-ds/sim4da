@@ -4,6 +4,7 @@ import dev.oxoo2a.sim4da.Message;
 import dev.oxoo2a.sim4da.Network;
 import dev.oxoo2a.sim4da.Node;
 
+import java.util.Objects;
 import java.util.Random;
 
 public class ProbabilisticNode extends Node {
@@ -20,7 +21,7 @@ public class ProbabilisticNode extends Node {
     protected void main() {
         Message m = new Message();
 
-        m.add("type", 1);
+        m.add("type", "base");
         m.add("counter", 1);
         sendUnicast(generateRandomNumber(Main.n_nodes, myId), m);
 
@@ -33,11 +34,17 @@ public class ProbabilisticNode extends Node {
 
             m = Message.fromJson(m_raw.payload);
 
-            int type = Integer.parseInt(m.query("type"));
+            String type = m.query("type");
             int counter = Integer.parseInt(m.query("counter"));
-            if(type == 1){
+            if(Objects.equals(type, "base")){
                 messagesReceived++;
                 active = true;
+            }
+            if(Objects.equals(type, "double_counting")){
+                m = new Message();
+                m.add("sent", messagesSent);
+                m.add("received", messagesReceived);
+                sendUnicast(Main.double_count_coordinator_id, m);
             }
 
 
@@ -47,10 +54,10 @@ public class ProbabilisticNode extends Node {
             int receiver = generateRandomNumber(Main.n_nodes, myId);
             if(active){
                 Random rand = new Random();
-                messagesSent++;
-                if(rand.nextDouble()<Main.probability){
-                    sendUnicast(receiver,m);
 
+                if(rand.nextDouble()<Main.probability){
+                    messagesSent++;
+                    sendUnicast(receiver,m);
                 }else{
                     System.out.println(myId + " missed probability");
                 }
