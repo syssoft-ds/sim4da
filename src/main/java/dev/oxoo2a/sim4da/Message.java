@@ -48,6 +48,6 @@ public class Message {
         return serializer.toJson(content); // Not sure about thread safety of Gson
     }
 
-    private final HashMap<String,String> content;
-    private static final Gson serializer = new Gson();
+    protected final HashMap<String,String> content;
+    protected static final Gson serializer = new Gson();
 }

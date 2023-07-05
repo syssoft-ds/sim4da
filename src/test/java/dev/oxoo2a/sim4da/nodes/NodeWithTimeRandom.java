@@ -1,11 +1,16 @@
-package dev.oxoo2a.sim4da;
+package dev.oxoo2a.sim4da.nodes;
+
+import dev.oxoo2a.sim4da.Message;
+import dev.oxoo2a.sim4da.Network;
+import dev.oxoo2a.sim4da.NodeWithTime;
+import dev.oxoo2a.sim4da.Time;
 
 import java.util.Random;
 
 /***
  * A node with a logic clock that performs some random actions when a event is triggered
  */
-public class NodeWithTimeRandom extends NodeWithTime{
+public class NodeWithTimeRandom extends NodeWithTime {
 
     private final int n_nodes;
 
@@ -14,21 +19,14 @@ public class NodeWithTimeRandom extends NodeWithTime{
         this.n_nodes = n_nodes;
     }
 
-    /***
-     * when the simulation starts the first node sends a message to the second
-     */
-    @Override
-    protected void handleStart() {
-        if (myId == 0) {
-            performEvent(new NodeEvent(NodeEvent.EventType.SEND_MESSAGE, 1));
-        }
-    }
+
 
     /***
      * The inner event of the node is sleeping/pausing for some milliseconds
      */
-    @Override
-    protected void handleInnerEvent() {
+    protected void innerEvent() {
+        time.incrementMyTime();
+        emit("%d: perform Inner Event at %s",myId,time.toString());
         try {
             Thread.sleep(2 * 100L);
         }
@@ -40,7 +38,6 @@ public class NodeWithTimeRandom extends NodeWithTime{
      * By random the events can be INNER or SEND_MESSAGE.
      * At leased one SEND_MESSAGE must be performed so that the network continuous to do something.
      */
-    @Override
     protected void handleReceivingMessage() {
         boolean sendPerformed = false;
 
@@ -54,20 +51,34 @@ public class NodeWithTimeRandom extends NodeWithTime{
                 // send message to a random receiving node
                 int randReceiverNodeId = rand.nextInt(n_nodes);
                 if(randReceiverNodeId != myId){
-                    performEvent(new NodeEvent(NodeEvent.EventType.SEND_MESSAGE, randReceiverNodeId));
+                    sendUnicast(randReceiverNodeId, new Message());
                     sendPerformed = true;
                 }
             }else{
                 // do inner event
-                performEvent(new NodeEvent(NodeEvent.EventType.INNER, -1));
+                innerEvent();
             }
         }
 
         // Make sure that at leased one message was send
         if(!sendPerformed){
-            performEvent(new NodeEvent(NodeEvent.EventType.SEND_MESSAGE, (myId+1) % n_nodes));
+            sendUnicast((myId+1) % n_nodes, new Message());
         }
     }
 
 
+    @Override
+    protected void main() {
+        //Message m = new Message();
+        if (myId == 0) {
+            sendUnicast(1, new Message());
+        }
+        while (true) {
+            // Listen for messages
+            Network.Message m_raw = receive();
+            if (m_raw == null) break;
+            // Message received
+            handleReceivingMessage();
+        }
+    }
 }

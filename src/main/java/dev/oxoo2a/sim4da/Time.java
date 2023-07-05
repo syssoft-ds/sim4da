@@ -18,4 +18,12 @@ public interface Time {
      * @param time_sender - time of the sender node in the string representation
      */
     void updateTime(String time_sender);
+
+
+    /***
+     * New time was received by a different node (sender).
+     * Now the time of the local node must be updated.
+     * @param time_sender - time of the sender node
+     */
+    void updateTime(Time time_sender);
 }

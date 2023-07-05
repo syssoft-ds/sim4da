@@ -1,4 +1,8 @@
-package dev.oxoo2a.sim4da;
+package dev.oxoo2a.sim4da.nodes;
+
+import dev.oxoo2a.sim4da.Message;
+import dev.oxoo2a.sim4da.Network;
+import dev.oxoo2a.sim4da.Node;
 
 public class TokenRingNode extends Node {
 

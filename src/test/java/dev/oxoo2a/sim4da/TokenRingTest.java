@@ -1,6 +1,6 @@
 package dev.oxoo2a.sim4da;
 
-import dev.oxoo2a.sim4da.Simulator;
+import dev.oxoo2a.sim4da.nodes.TokenRingNode;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.fail;

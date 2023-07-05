@@ -1,4 +1,6 @@
-package dev.oxoo2a.sim4da;
+package dev.oxoo2a.sim4da.times;
+
+import dev.oxoo2a.sim4da.Time;
 
 import java.util.Arrays;
 
@@ -40,6 +42,17 @@ public class VectorTime implements Time {
             int sender_i_int = Integer.parseInt(arr[i]);
             if(sender_i_int > time[i])
                 time[i] = sender_i_int;
+        }
+    }
+
+    @Override
+    public void updateTime(Time time_sender) {
+        if(!( time_sender instanceof VectorTime))
+            throw new IllegalArgumentException("Wrong time format");
+        VectorTime v_time_sender = (VectorTime) time_sender;
+        for(int i = 0; i < time.length; i++){
+            if(v_time_sender.time[i] > time[i])
+                time[i] = v_time_sender.time[i];
         }
     }
 }

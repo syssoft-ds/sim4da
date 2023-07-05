@@ -1,5 +1,8 @@
 package dev.oxoo2a.sim4da;
 
+import dev.oxoo2a.sim4da.nodes.NodeWithTimeRandom;
+import dev.oxoo2a.sim4da.times.LamportTime;
+import dev.oxoo2a.sim4da.times.VectorTime;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.fail;
@@ -31,13 +34,11 @@ public class NodeWithTimeTest {
             nodes[id] = n;
         }
         try {
-            s.runSimulation(3);
-            nodes[0].performEvent(new NodeEvent(NodeEvent.EventType.INNER, -1));
+            s.runSimulation(2);
         }
         catch (InstantiationException ignored) {
             fail("Not all nodes instantiated");
         }
-        NodeEvent.printAllEvents();
     }
 
     @Test
