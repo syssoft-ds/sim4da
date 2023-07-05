@@ -7,7 +7,10 @@ import dev.oxoo2a.sim4da.Node;
 import java.util.Random;
 
 public class ProbabilisticNode extends Node {
-    boolean active;
+    private boolean active;
+    private int messagesSent;
+    private int messagesReceived;
+
     public ProbabilisticNode(int my_id) {
         super(my_id);
         active = true;
@@ -33,6 +36,7 @@ public class ProbabilisticNode extends Node {
             int type = Integer.parseInt(m.query("type"));
             int counter = Integer.parseInt(m.query("counter"));
             if(type == 1){
+                messagesReceived++;
                 active = true;
             }
 
@@ -43,8 +47,10 @@ public class ProbabilisticNode extends Node {
             int receiver = generateRandomNumber(Main.n_nodes, myId);
             if(active){
                 Random rand = new Random();
+                messagesSent++;
                 if(rand.nextDouble()<Main.probability){
                     sendUnicast(receiver,m);
+
                 }else{
                     System.out.println(myId + " missed probability");
                 }
