@@ -24,6 +24,7 @@ public class ProbabilisticNode extends Node {
         m.add("type", "base");
         m.add("counter", 1);
         sendUnicast(generateRandomNumber(Main.n_nodes, myId), m);
+        messagesSent++;
 
         while (true){
             Network.Message m_raw = receive();
@@ -35,35 +36,41 @@ public class ProbabilisticNode extends Node {
             m = Message.fromJson(m_raw.payload);
 
             String type = m.query("type");
-            int counter = Integer.parseInt(m.query("counter"));
-            if(Objects.equals(type, "base")){
-                messagesReceived++;
-                active = true;
-            }
             if(Objects.equals(type, "double_counting")){
                 m = new Message();
                 m.add("sent", messagesSent);
                 m.add("received", messagesReceived);
                 sendUnicast(Main.double_count_coordinator_id, m);
-            }
+
+            }else{
 
 
-            //emit("%d: activation == %d", myId, counter);
-            counter++;
-            m.add("counter", counter);
-            int receiver = generateRandomNumber(Main.n_nodes, myId);
-            if(active){
-                Random rand = new Random();
 
-                if(rand.nextDouble()<Main.probability){
-                    messagesSent++;
-                    sendUnicast(receiver,m);
-                }else{
-                    System.out.println(myId + " missed probability");
+                int counter = Integer.parseInt(m.query("counter"));
+                if(Objects.equals(type, "base")){
+                    messagesReceived++;
+                    active = true;
                 }
 
-                active = false;
+
+                //emit("%d: activation == %d", myId, counter);
+                counter++;
+                m.add("counter", counter);
+                int receiver = generateRandomNumber(Main.n_nodes, myId);
+                if(active){
+                    Random rand = new Random();
+
+                    if(rand.nextDouble()<Main.probability){
+                        messagesSent++;
+                        sendUnicast(receiver,m);
+                    }else{
+                        System.out.println(myId + " missed probability");
+                    }
+
+                    active = false;
+                }
             }
+
         }
     }
 
