@@ -31,7 +31,6 @@ public class ProbabilisticNode extends Node {
             if(m_raw == null) {
                 System.out.println("breaking");
             }
-            System.out.println(m_raw);
 
             m = Message.fromJson(m_raw.payload);
 
@@ -41,17 +40,12 @@ public class ProbabilisticNode extends Node {
                 m.add("sent", messagesSent);
                 m.add("received", messagesReceived);
                 sendUnicast(Main.double_count_coordinator_id, m);
-
             }else{
-
-
-
                 int counter = Integer.parseInt(m.query("counter"));
                 if(Objects.equals(type, "base")){
                     messagesReceived++;
                     active = true;
                 }
-
 
                 //emit("%d: activation == %d", myId, counter);
                 counter++;
@@ -70,7 +64,6 @@ public class ProbabilisticNode extends Node {
                     active = false;
                 }
             }
-
         }
     }
 

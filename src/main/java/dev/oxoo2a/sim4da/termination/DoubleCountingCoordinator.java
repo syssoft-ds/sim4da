@@ -28,13 +28,13 @@ public class DoubleCountingCoordinator extends Node {
         while(true){
             if(prompt){
                 for (int i = 0; i < Main.n_nodes; i++) {
-
                     m = new Message();
                     m.add("type", "double_counting");
                     sendUnicast(i,m);
                 }
                 prompt = false;
             }
+
             Network.Message m_raw = receive();
             if(m_raw == null){
                 System.out.println("Coordinator got null message");
@@ -48,7 +48,6 @@ public class DoubleCountingCoordinator extends Node {
 
                 // TODO: Gute Moeglichkei für abgleich auasdenken
                 if(!secondPrompt){
-
                     messagesSent1 += Integer.parseInt(sent);
                     messagesReceived1 += Integer.parseInt(received);
                 }else{
@@ -69,6 +68,7 @@ public class DoubleCountingCoordinator extends Node {
                             System.out.println("SYSTEM TERMINATED");
                             System.exit(0);
                         }
+
                         messagesSent1=0;
                         messagesReceived1=0;
                         messagesSent2=0;
@@ -81,9 +81,6 @@ public class DoubleCountingCoordinator extends Node {
                     prompt=true;
                 }
             }
-
-
         }
-
     }
 }
