@@ -2,8 +2,7 @@ package dev.oxoo2a.sim4da;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.beans.Transient;
-
+import dev.oxoo2a.sim4da.nodes.BroadcastNode;
 import org.junit.jupiter.api.Test;
 
 public class SimulatorTest {
