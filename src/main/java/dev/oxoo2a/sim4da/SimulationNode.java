@@ -33,10 +33,15 @@ public class SimulationNode extends Node{
             emit("Node %d, Loop %d","main",myId,loops);
             Network.Message m_raw = receive();
             HashMap<Integer, int[]> controlVect = receiveControlVector(myId);
-            if(controlVect !=null)
+            if(controlVect!=null && controlVect.size()!=0)
             {
                 controlVector = controlVect.get(myId);
+                if(!isActive)
+                {
+                    sendControlVectorToNetwork(r);
+                }
             }
+
             if (m_raw == null )
             {
 
@@ -79,25 +84,37 @@ public class SimulationNode extends Node{
             isActive = false;
             if(controlVector!= null)
             {
-                randomRecipient = getRandomRecipientOfControlVector(r);
-                readVector();
-                emit("Node %d, ControlVector %s", "clock", myId, Arrays.toString(controlVector));
-                sendControlVectorToNetwork(randomRecipient, controlVector);
-                controlVector = null;
+                sendControlVectorToNetwork(r);
             }
         }
     }
 
+    private void sendControlVectorToNetwork(Random r) {
+        int randomRecipient;
+        randomRecipient = getRandomRecipient(r);
+        readVector();
+        emit("Node %d, ControlVector %s", "clock", myId, Arrays.toString(controlVector));
+        sendControlVectorToNetwork(randomRecipient, controlVector);
+        controlVector = null;
+    }
+
     private int getRandomRecipientOfControlVector(Random p)
     {
-        ArrayList<Integer> nonZeroIndices = new ArrayList<>();
-        for (int i = 0; i < vector.length; i++) {
-            if (vector[i] != 0) {
-                nonZeroIndices.add(i);
+        try {
+            ArrayList<Integer> nonZeroIndices = new ArrayList<>();
+            for (int i = 0; i < vector.length; i++) {
+                if (vector[i] != 0) {
+                    nonZeroIndices.add(i);
+                }
             }
+            Random random = new Random();
+            return nonZeroIndices.get(random.nextInt(nonZeroIndices.size()));
+
         }
-        Random random = new Random();
-        return nonZeroIndices.get(random.nextInt(nonZeroIndices.size()));
+         catch (Exception e)
+         {
+             return getRandomRecipient(p);
+         }
     }
 
 

@@ -159,7 +159,7 @@ public class Simulator implements Node2Simulator {
 
         if(network.controlVector.containsKey(Id))
         {
-            HashMap<Integer, int[]> controlVector = network.controlVector;
+            HashMap<Integer, int[]> controlVector = new HashMap<>(network.controlVector);
             network.controlVector.clear();
             return controlVector;
         }
