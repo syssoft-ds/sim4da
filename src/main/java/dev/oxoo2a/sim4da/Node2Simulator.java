@@ -1,5 +1,7 @@
 package dev.oxoo2a.sim4da;
 
+import java.util.HashMap;
+
 public interface Node2Simulator {
     int numberOfNodes();
     boolean stillSimulating ();
@@ -7,6 +9,15 @@ public interface Node2Simulator {
     void sendUnicast ( int sender_id, int receiver_id, Message m );
     void sendBroadcast ( int sender_id, String m );
     void sendBroadcast ( int sender_id, Message m );
+    void passControlMessage(ControlMessage cm);
+    ControlMessage receiveControlMessage (int id);
     Network.Message receive ( int my_id );
-    void emit ( String format, Object ... args );
+    void emit ( String format, String logType, Object ... args );
+    void sendControlMessage(ControlMessage controlMessage);
+    void updateStatus();
+    boolean checkIfFinilised();
+
+    HashMap<Integer,int[]> returnControlVector(int id);
+
+    void sendControlVectorToNetwork(int randomRecipient, int[] controlVector);
 }
