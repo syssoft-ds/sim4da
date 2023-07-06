@@ -8,27 +8,24 @@ import dev.oxoo2a.sim4da.Node;
  * Nachlaufender Kontrollvector zur Bestimmung der Terminierung
  * @author Tessa Steinigke
  */
-public class TerminatorControlVectorNode extends Node {
-
-    private final int n_nodes;
+public class TerminatorControlVectorNode extends Terminator {
 
     private final int[] statistics;
     private int node_request_next_statistics = 0;
 
     public TerminatorControlVectorNode(int my_id, int n_nodes) {
-        super(my_id);
-        this.n_nodes = n_nodes;
+        super(my_id, n_nodes);
         statistics = new int[n_nodes];
     }
 
-    private void send_request(){
+    protected void send_request(){
         Message m =  new Message();
         m.add("request","vector");
         sendUnicast(node_request_next_statistics, m);
         node_request_next_statistics = (node_request_next_statistics +1) % n_nodes;
     }
 
-    private void receive_status(Message m){
+    protected void receive_status(Message m){
         if(m.query("request")!= null) return; // Ignore requests
 
         String sender_v_s = m.query("vector");
@@ -43,6 +40,7 @@ public class TerminatorControlVectorNode extends Node {
         // Check termination
         if(!running){
             // TERMINATED
+            termination_detected = true;
             emit("!! TERMINATION DETECTED BY FOLLOWING-VECTOR-METHODE");
         }else{
             // Not terminated
@@ -50,15 +48,4 @@ public class TerminatorControlVectorNode extends Node {
         }
     }
 
-    @Override
-    protected void main() {
-        send_request();
-        while (true) {
-            // Listen for messages
-            Network.Message m_raw = receive();
-            if (m_raw == null) break;
-            // Message received
-            receive_status(Message.fromJson(m_raw.payload));
-        }
-    }
 }

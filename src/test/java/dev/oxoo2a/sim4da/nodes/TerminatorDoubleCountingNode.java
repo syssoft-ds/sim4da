@@ -6,9 +6,7 @@ import dev.oxoo2a.sim4da.*;
  * Doppelzählverfahren zur Bestimmung der Terminierung
  * @author Tessa Steinigke
  */
-public class TerminatorDoubleCountingNode extends Node {
-
-    private int n_nodes;
+public class TerminatorDoubleCountingNode extends Terminator {
 
     /**
      * [Interval 1: sums of send|received|active],
@@ -19,19 +17,18 @@ public class TerminatorDoubleCountingNode extends Node {
     private int c_statistics_missing = n_nodes;
 
     public TerminatorDoubleCountingNode(int my_id, int n_nodes) {
-        super(my_id);
-        this.n_nodes = n_nodes;
+        super(my_id, n_nodes);
         statistics = new int[2][3];
     }
 
-    private void send_request(){
+    protected void send_request(){
         c_statistics_missing = n_nodes;
         Message m =  new Message();
         m.add("request","send/received");
         sendBroadcast(m);
     }
 
-    private void receive_status(Message m){
+    protected void receive_status(Message m){
         if(m.query("request")!= null) return; // Ignore requests
 
         c_statistics_missing--;
@@ -61,6 +58,7 @@ public class TerminatorDoubleCountingNode extends Node {
                 terminated = (val == statistics[0][1]) & (val == statistics[1][0]) & (val == statistics[1][1]);
                 if(terminated){
                     // TERMINATED
+                    termination_detected = true;
                     emit("!! TERMINATION DETECTED BY DOUBLE-COUNTING-METHODE");
                     return;
                 }
@@ -80,15 +78,4 @@ public class TerminatorDoubleCountingNode extends Node {
         }
     }
 
-    @Override
-    protected void main() {
-        send_request();
-        while (true) {
-            // Listen for messages
-            Network.Message m_raw = receive();
-            if (m_raw == null) break;
-            // Message received
-            receive_status(Message.fromJson(m_raw.payload));
-        }
-    }
 }

@@ -18,7 +18,7 @@ public class TerminationTest {
     private static final int p_prob = 1;
 
     /***
-     * Tests the token Ring
+     * Tests the termination
      */
     @Test
     public void termination() {
@@ -40,6 +40,11 @@ public class TerminationTest {
         catch (InstantiationException ignored) {
             fail("Not all nodes instantiated");
         }
+
+        if(!w_dd.hasTermination_detected())
+            fail("Double counting methode did not detect termination");
+        if(!w_cv.hasTermination_detected())
+            fail("Following vector methode did not detect termination");
     }
 
 }
