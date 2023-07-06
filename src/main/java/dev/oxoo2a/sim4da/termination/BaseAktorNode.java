@@ -11,19 +11,17 @@ import java.util.StringTokenizer;
 
 public class BaseAktorNode extends Node
 {
-    private int numberOfNodes;
-    private double probability;
-    private Random rand;
+    private final int numberOfNodes;
+    private final double probability;
+    private final Random rand;
 
-    private TerminationType terminationType;
+    private final TerminationType terminationType;
 
     public BaseAktorNode(int my_id, int numberOfNodes, double probability, TerminationType terminationType) {
         super(my_id);
         this.numberOfNodes= numberOfNodes;
         this.probability=probability;
         this.rand= new Random(111+my_id);
-        this.messagesReceived=0;
-        this.messagesSend=0;
         this.terminationType= terminationType;
     }
 
@@ -37,38 +35,18 @@ public class BaseAktorNode extends Node
 
     }
 
-    private Message getSpecialMessage(String iteration){
-        Message m= new Message();
-        m.getMap().put(MessageNameHelper.ID, String.valueOf(myId));
-        m.getMap().put(MessageNameHelper.iteration, iteration);
-        m.getMap().put(MessageNameHelper.specialAnswer, "true");
-        m.getMap().put(MessageNameHelper.messagesReceived,getMessagesReceived() );
-        m.getMap().put(MessageNameHelper.messagesSend,getMessagesSend());
-        return m;
-    }
 
 
-
-    public String getMessagesSend() {
-        return String.valueOf(messagesSend);
-    }
-
-    public String getMessagesReceived() {
-        return String.valueOf(messagesReceived);
-    }
-
-    public int getIDExceptSelf(){
-        int id= myId;
-        while(id== myId)
-            id= rand.nextInt(numberOfNodes);
-        return id;
-    }
-
-
-    private int messagesSend;
-    private int messagesReceived;
+    /**
+     * wird dies in der main aufgerufen verhält sich die Node entlang einer terminierung mit Doppelzaehlverfahren
+     * erhält die node eine NAchricht bei dem die map einen Schlüssel specialRequest ist diese Nachricht von einer der Kontrollnodes
+     * Es wird geantwortet mit der Anzahl an gesendeten und empfangenen nachrichten
+     * Ansonsten werden Base Messages mit einer Wahrscheinlichkeit von x versand
+     */
 
     public void beAnActorForCountProcedure(){
+        this.messagesReceived=0;
+        this.messagesSend=0;
         Message m = new Message();
         m.getMap().put(MessageNameHelper.baseMessage, "true");
         m.getMap().put(MessageNameHelper.ID, String.valueOf(myId));
@@ -76,16 +54,18 @@ public class BaseAktorNode extends Node
         messagesSend++;
 
         while (true){
+
             Network.Message m_raw = receive();
             if(m_raw == null) break;
             m = Message.fromJson(m_raw.payload);
 
             if(m.getMap().containsKey(MessageNameHelper.baseMessage)){
+
                 messagesReceived++;
-                System.out.println("Incremented received");
+
                 if(rand.nextDouble()< probability){
+
                     messagesSend++;
-                    System.out.println("Incremented send");
                     m.getMap().put(MessageNameHelper.ID, String.valueOf(myId));
                     m.getMap().put(MessageNameHelper.baseMessage, "true");
                     sendUnicast(getIDExceptSelf(),m);
@@ -93,20 +73,27 @@ public class BaseAktorNode extends Node
                 }else{
                     System.out.println("Node "+ myId+" will not send a message");
                 }
-
             }else if(m.getMap().containsKey(MessageNameHelper.specialRequest)){
-                String iteration= m.getMap().get(MessageNameHelper.iteration);
+
                 int ID= Integer.parseInt(m.getMap().get(MessageNameHelper.ID));
-                m= getSpecialMessage(iteration);
+                m= getSpecialMessage();
                 sendUnicast(ID, m);
+
             }
-
-
-
         }
     }
-    private int [] localVector;
 
+    /**
+     * dies wird in main aufgerufen wenn als terminierung ein kontrollvektor genutzt wird,
+     * Eine NAchricht die den Kontrollvektor beinhaltet hat in der Map einen Key specialRequest welche die nachricht mit Kontrollvektor zeichnet
+     * Dieser wird über den key controlVector erreicht
+     * man hätte natürlich den kontrollvektor direkt als Wert vom Schlüssel specialRequest setzen können, aber nehmen wir an, aber als Value könnten da möglicherweise andere
+     * Dinge sinnvoll sein
+     * erhält die node eine Base Message also eine normale Nachricht von einer anderen Node, wird mit wahrscheinlichkeit x ebenfalls eine Nachricht an eine zufällige Node gesendet
+     *
+     * Der Kontrollvektor wird von der Kontrollnode zuerst an Base Node mit der Id 0 geschickt, von da an wird der Vektor an die folgende Node geschickt
+     * Die letzte Node schickt den vektor zurück an die Kontrollnode, die prüft ob eine Terminierung gefunden wurde
+     */
     public void beAnActorForVector(){
         localVector= new int[numberOfNodes];
 
@@ -134,8 +121,6 @@ public class BaseAktorNode extends Node
                     } else {
                         System.out.println("Node " + myId + " will not send a message");
                     }
-
-
             }else if(m.getMap().containsKey(MessageNameHelper.specialRequest)){
 
                     String controlVector= m.getMap().get(MessageNameHelper.controlVector);
@@ -153,21 +138,48 @@ public class BaseAktorNode extends Node
                         m.getMap().put(MessageNameHelper.specialRequest, "true");
                         sendUnicast((myId + 1) % numberOfNodes, m);
                     }
-
             }
-
-
-
         }
-
-
     }
+
+    ///////////////Only For doubleCountProcedure
+    private int messagesSend;
+    private int messagesReceived;
+    private Message getSpecialMessage(){
+        Message m= new Message();
+        m.getMap().put(MessageNameHelper.ID, String.valueOf(myId));
+        m.getMap().put(MessageNameHelper.specialAnswer, "true");
+        m.getMap().put(MessageNameHelper.messagesReceived,getMessagesReceived() );
+        m.getMap().put(MessageNameHelper.messagesSend,getMessagesSend());
+        return m;
+    }
+    public String getMessagesSend() {
+        return String.valueOf(messagesSend);
+    }
+
+    public String getMessagesReceived() {
+        return String.valueOf(messagesReceived);
+    }
+    //////////////////end
+
+
+
+
+    //////////////only for Vector Procedure
+    private int [] localVector; //gets initiated at start of vector procedure with number of base nodes
+
     private void onReceive(){
         localVector[myId]--;
     }
     private void onSend(int ID){
         localVector[ID]++;
     }
+
+    /**
+     *
+     * @param controlVector der kontrollvektor aus der Nachricht, wurde aus String ausgelesen
+     * @return der verrechnete kontrollvektor für die nachricht, muss noch als String verpackt werden
+     */
     private int[] calculateControlVector(int [] controlVector){
 
         if(localVector.length!= controlVector.length)
@@ -178,6 +190,12 @@ public class BaseAktorNode extends Node
         }
         return controlVector;
     }
+
+    /**
+     *
+     * @param controlVectorAsStringFromMessage kontrollVektor als String aus der Message
+     * @return verrechneter Kontrollvektor um an nächste BaseNode oder den controller weiterzuschicken falls diese node die letzte
+     */
 
     private String buildControlVectorString(String controlVectorAsStringFromMessage){
 
@@ -195,6 +213,15 @@ public class BaseAktorNode extends Node
         }
         return controlVectorAsString;
 
+    }
+    //////////////////////end
+
+    ///////////////Util
+    public int getIDExceptSelf(){
+        int id= myId;
+        while(id== myId)
+            id= rand.nextInt(numberOfNodes);
+        return id;
     }
 
 

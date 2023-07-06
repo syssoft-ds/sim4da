@@ -1,5 +1,6 @@
 package dev.oxoo2a.sim4da.termination;
 
+import java.util.Random;
 import java.util.StringTokenizer;
 
 public class Utils {
@@ -26,6 +27,13 @@ public class Utils {
             }
         }
         return controlVector;
+    }
+
+    public static int getIDExceptSelf(int myId, int numberOfNodes, Random rand){
+        int id= myId;
+        while(id== myId)
+            id= rand.nextInt(numberOfNodes);
+        return id;
     }
 
 

@@ -13,11 +13,11 @@ public class Main {
 
         TimeManager.setTimer();
 
-        int n_terminator = 1;
+        int n_terminator = 2;
         int n_nodes = 150;
         int allNodes= n_nodes+ n_terminator;
-        TerminationType terminationType= TerminationType.vector;
-        ClockTypeToUse clockTypeToUse = ClockTypeToUse.vectorClock;
+        TerminationType terminationType= TerminationType.countProcedure;
+        //ClockTypeToUse clockTypeToUse = ClockTypeToUse.vectorClock;
 
         Simulator s = Simulator.createDefaultSimulator(allNodes);
         /*for (int id=0; id<n_nodes; id++) {
@@ -29,7 +29,7 @@ public class Main {
             s.attachNode(id,n);
         }
         for (int id=n_nodes; id<allNodes; id++) {
-            Node n = new TerminationNode(id, n_nodes, 1000, terminationType);
+            Node n = new TerminationNode(id, n_nodes, 50, terminationType);
             s.attachNode(id,n);
         }
 /*
