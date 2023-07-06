@@ -4,7 +4,7 @@ import dev.oxoo2a.sim4da.Node;
 import dev.oxoo2a.sim4da.Simulator;
 
 public class Main {
-    static int n_nodes = 15;
+    static int n_nodes = 3;
     static double probability =0.9;
     static int double_count_coordinator_id = n_nodes;
     static int control_vector_coordinator_id = double_count_coordinator_id+1;

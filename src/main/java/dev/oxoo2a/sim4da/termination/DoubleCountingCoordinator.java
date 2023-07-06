@@ -65,8 +65,9 @@ public class DoubleCountingCoordinator extends Node {
                         if (messagesSent1 == messagesSent2
                                 && messagesReceived1 == messagesReceived2
                                 && messagesSent1 == messagesReceived1){
-                            System.out.println("SYSTEM TERMINATED");
-                            System.exit(0);
+                            System.out.println("DOUBLE COUNTING SAYS SYSTEM TERMINATED");
+                            //System.exit(0);
+                            break;
                         }
 
                         messagesSent1=0;

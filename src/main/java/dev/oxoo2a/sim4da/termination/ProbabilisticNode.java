@@ -26,10 +26,13 @@ public class ProbabilisticNode extends Node {
     @Override
     protected void main() {
         Message m = new Message();
+        int receiver;
 
         m.add("type", "base");
         m.add("counter", 1);
-        sendUnicast(generateRandomNumber(Main.n_nodes, myId), m);
+        receiver = generateRandomNumber(Main.n_nodes, myId);
+        sendUnicast(receiver, m);
+        V[receiver]++;
         messagesSent++;
 
         while (true){
@@ -49,10 +52,27 @@ public class ProbabilisticNode extends Node {
             }else if(Objects.equals(type, "control_vector")){
                 System.out.println("NODE " + myId+ " RECEIVED CONTROL VECTOR MESSAGE");
                 String vector = m.query("vector");
-                parseVector(vector);
-                String newVectorString = buildVectorString();
-                System.out.println("NEW Vector String: " + newVectorString);
+
+                System.out.print("NODE " + myId + " LOCAL VECTOR: ");
+
+                for (int i = 0; i < V.length; i++) {
+                    System.out.print(i + ":" + V[i] + ";");
+                }
+                System.out.println("PARSING VECTOR");
+                // Parse Vector String and add to local vector V
+                String newVectorString = parseVector(vector);
+                // Create new Vector String from local vector V
+
+
+                System.out.println("NODE " + myId + " REMOTE VECTOR " + vector);
+                System.out.println();
+                System.out.println("NODE " + myId + " NEW Vector String: " + newVectorString);
+                m = new Message();
+                m.add("type", "control_vector");
+                m.add("vector", newVectorString);
                 //TODO: Send Message around to each Node (as in TokenRingNode). Finally send back to Coordinator
+                receiver = myId==Main.n_nodes-1 ? Main.control_vector_coordinator_id : myId+1;
+                sendUnicast(receiver,m);
             }else{
                 int counter = Integer.parseInt(m.query("counter"));
                 if(Objects.equals(type, "base")){
@@ -65,7 +85,7 @@ public class ProbabilisticNode extends Node {
                 //emit("%d: activation == %d", myId, counter);
                 counter++;
                 m.add("counter", counter);
-                int receiver = generateRandomNumber(Main.n_nodes, myId);
+                receiver = generateRandomNumber(Main.n_nodes, myId);
                 if(active){
                     Random rand = new Random();
 
@@ -95,23 +115,26 @@ public class ProbabilisticNode extends Node {
         return randomNum;
     }
 
-    private void parseVector(String vectorString){
+    private String parseVector(String vectorString){
         StringTokenizer tokenizer = new StringTokenizer(vectorString, ";");
+        int[] newV = new int[Main.n_nodes];
         while(tokenizer.hasMoreTokens()){
             String vectorField = tokenizer.nextToken();
             StringTokenizer subTokenizer = new StringTokenizer(vectorField, ":");
             int id = Integer.parseInt(subTokenizer.nextToken());
             int val = Integer.parseInt(subTokenizer.nextToken());
-            V[id] = V[id] + val;
+
+            int result = V[id] + val;
+            System.out.println("RESULT FOR LOCAL VECTOR OF NODE " + myId +" FOR ENTRY " + id + " IS " + result);
+            newV[id] = V[id] + val;
         }
+        String newVectorString ="";
+        for (int i = 0; i < newV.length-1; i++) {
+            newVectorString = newVectorString + i +":" + newV[i] + ";";
+        }
+        newVectorString = newVectorString + (newV.length-1)  +":" + newV[newV.length-1];
+        return newVectorString;
     }
 
-    private String buildVectorString(){
-        String s ="";
-        for (int i = 0; i < V.length-1; i++) {
-            s = s + i +":" + V[i] + ";";
-        }
-        s = s + (V.length-1)  +":" + V[V.length-1];
-        return s;
-    }
+
 }
