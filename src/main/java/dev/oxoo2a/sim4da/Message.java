@@ -1,21 +1,42 @@
 package dev.oxoo2a.sim4da;
 
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 public class Message {
 
+    private final String time;
+
     public Message () {
-        content = new HashMap<>();
+        this(new HashMap<>(), "");
+    }
+    protected Message ( HashMap<String,String> content ) {
+        this(content, "");
+    }
+    public Message(Time time){
+        this(new HashMap<>(), time.toString());
+    }
+    public Message(Message m, Time time){
+        this(m.content, time);
+    }
+    public Message(HashMap<String,String> content, Time time){
+        this(content, time.toString());
+    }
+    public Message(HashMap<String,String> content, String time){
+        this.content = content;
+        this.time = time;
     }
 
-    protected Message ( HashMap<String,String> content ) {
-        this.content = content;
+    public boolean hasTime(){
+        return !time.equals("");
     }
+
+    public String getTime(){
+        return time;
+    }
+
     public Message add ( String key, String value ) {
         content.put(key,value);
         return this;
@@ -24,7 +45,6 @@ public class Message {
     public Message add ( String key, int value ) {
         content.put(key,String.valueOf(value));
         return this;
-
     }
 
     public String query ( String key ) {
@@ -36,16 +56,15 @@ public class Message {
     }
 
     public String toJson () {
-        return serialize(content);
+        return serialize(this);
     }
 
     public static Message fromJson ( String s ) {
-        Type contentType = new TypeToken<HashMap<String,String>>() {}.getType();
-        return new Message(serializer.fromJson(s,contentType));
+        return serializer.fromJson(s, Message.class);
     }
 
-    private static synchronized String serialize ( Map<String,String> content ) {
-        return serializer.toJson(content); // Not sure about thread safety of Gson
+    private static synchronized String serialize ( Message m ) {
+        return serializer.toJson(m); // Not sure about thread safety of Gson
     }
 
     protected final HashMap<String,String> content;

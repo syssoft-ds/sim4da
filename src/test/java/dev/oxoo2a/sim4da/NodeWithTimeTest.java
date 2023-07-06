@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 /***
  * Test nodes with logic clocks
+ * @author Tessa Steinigke
  */
 public class NodeWithTimeTest {
 
@@ -22,7 +23,6 @@ public class NodeWithTimeTest {
      */
     private static void test(TimeType type){
         Simulator s = Simulator.createDefaultSimulator(n_nodes);
-        NodeWithTime[] nodes = new NodeWithTime[n_nodes];
         for (int id=0; id<n_nodes; id++) {
             Time time;
             if(type == TimeType.LAMPORT)
@@ -31,7 +31,6 @@ public class NodeWithTimeTest {
                 time = new VectorTime(id, n_nodes);
             NodeWithTime n = new NodeWithTimeRandom(id, time, n_nodes);
             s.attachNode(id,n);
-            nodes[id] = n;
         }
         try {
             s.runSimulation(2);

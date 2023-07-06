@@ -15,7 +15,7 @@ public class NodeWithTimeRandom extends NodeWithTime {
     private final int n_nodes;
 
     public NodeWithTimeRandom(int id, Time time, int n_nodes){
-        super(id, time);
+        super(id, time, true);
         this.n_nodes = n_nodes;
     }
 
