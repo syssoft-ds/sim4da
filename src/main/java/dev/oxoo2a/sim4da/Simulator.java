@@ -1,6 +1,7 @@
 package dev.oxoo2a.sim4da;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.io.PrintStream;
 import java.util.Map;
@@ -23,6 +24,8 @@ public class Simulator implements Node2Simulator {
         tracer = new Tracer(name,ordered,enableTracing,useLog4j2,alternativeDestination);
         doubleCountTerminator = new DoubleCountTerminator(n_nodes);
         doubleCountTerminator.setSimulator(this);
+        controlVectorTerminator = new VectorControlTerminator();
+        controlVectorTerminator.setSimulator(this);
         network = new Network(n_nodes,tracer);
         nodes = new HashMap<Integer, Simulator2Node>(n_nodes);
         for (int n_id = 0; n_id < n_nodes; ++n_id)
@@ -66,6 +69,8 @@ public class Simulator implements Node2Simulator {
         is_simulating = false;
         doubleCountTerminator.stop();
         doubleCountTerminator.end();
+        controlVectorTerminator.stop();
+        controlVectorTerminator.end();
         // Stop network - release nodes waiting in receive ...
         network.stop();
         // Tell all nodes to stop and wait for the threads to terminate
@@ -78,6 +83,7 @@ public class Simulator implements Node2Simulator {
     {
         is_simulating = false;
     }
+
     @Override
     public boolean stillSimulating() {
         return is_simulating;
@@ -123,6 +129,43 @@ public class Simulator implements Node2Simulator {
         emit("sent a control message to the node %d", "clock", controlMessage.getId());
         network.addToControlQueue(controlMessage);
     }
+    @Override
+    public boolean checkIfFinilised() {
+
+        synchronized (network.controlVector){
+            if(network.controlVector == null)
+            {
+                return false;
+            }
+            else{
+                for (int[] value : network.controlVector.values())
+                {
+                    return (Arrays.stream(value).allMatch(element -> element == 0));
+                }
+            }
+            return false;
+        }
+
+    }
+    @Override
+    public void sendControlVectorToNetwork(int randomRecipient, int[] controlVector)
+    {
+        network.controlVector.put(randomRecipient, controlVector);
+    }
+
+    @Override
+    public HashMap<Integer, int[]> returnControlVector(int Id) {
+       // if(network.controlVector.isEmpty()) return null;
+
+        if(network.controlVector.containsKey(Id))
+        {
+            HashMap<Integer, int[]> controlVector = network.controlVector;
+            network.controlVector.clear();
+            return controlVector;
+        }
+
+        return null;
+    }
 
     @Override
     public void emit (String format, String logType, Object ... args) {
@@ -134,4 +177,6 @@ public class Simulator implements Node2Simulator {
     private final Network network;
     private final HashMap<Integer, Simulator2Node> nodes;
     private boolean is_simulating = false;
+
+    private VectorControlTerminator controlVectorTerminator;
 }

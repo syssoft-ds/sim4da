@@ -78,7 +78,7 @@ public class DoubleCountTerminator{
             else if (counter==2 && checkReceivedQueue(received_array)) {
 
                 simulator.updateStatus();
-                simulator.emit("TERMINATING", "doublecount","after 2 runs");
+                simulator.emit("TERMINATING DOUBLE COUNT", "doublecount","after 2 runs");
                 System.exit(0);
                 break;
             }

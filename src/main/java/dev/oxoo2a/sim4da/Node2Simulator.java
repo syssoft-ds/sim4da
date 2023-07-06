@@ -15,4 +15,9 @@ public interface Node2Simulator {
     void emit ( String format, String logType, Object ... args );
     void sendControlMessage(ControlMessage controlMessage);
     void updateStatus();
+    boolean checkIfFinilised();
+
+    HashMap<Integer,int[]> returnControlVector(int id);
+
+    void sendControlVectorToNetwork(int randomRecipient, int[] controlVector);
 }

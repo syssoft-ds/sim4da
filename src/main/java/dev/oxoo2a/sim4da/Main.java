@@ -7,7 +7,7 @@ public class Main {
     public  void simpleSimulation() {
         Simulator s = Simulator.createDefaultSimulator(n_nodes);
         for (int id=0; id<n_nodes; id++) {
-            Node n = new SimulationNode(id);
+            Node n = new SimulationNode(id, n_nodes);
             s.attachNode(id,n);
         }
         try {

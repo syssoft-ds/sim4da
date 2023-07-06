@@ -1,15 +1,18 @@
 package dev.oxoo2a.sim4da;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
 
 public class Network {
 
-    public Network ( int n_nodes, Tracer tracer ) {
+    public Network (int n_nodes, Tracer tracer ) {
         this.n_nodes = n_nodes;
         this.tracer = tracer;
         cmq_dc = new ControlMessageQueue();
+        controlVector = initializeControlVector(n_nodes);
         mqueues = new MessageQueue[n_nodes];
         for (int i=0; i<n_nodes; ++i)
             mqueues[i] = new MessageQueue();
@@ -144,10 +147,22 @@ public class Network {
             mq.stop();
     }
 
+    private HashMap<Integer, int[]> initializeControlVector(int n_nodes) {
+        Random r = new Random();
+        int r_node = r.nextInt(numberOfNodes());
+        int[] vector = new int[n_nodes];
+        Arrays.fill(vector, 0);
+        HashMap<Integer, int[]> n = new HashMap<Integer, int[]>();
+        n.put(r_node, vector);
+        return n;
+    }
+
     private final int n_nodes;
     private final Tracer tracer;
     private final MessageQueue[] mqueues;
     protected ControlMessageQueue cmq_dc;
     private static final Random rgen = new Random();
+
+    protected HashMap<Integer,int[]> controlVector;
 
 }

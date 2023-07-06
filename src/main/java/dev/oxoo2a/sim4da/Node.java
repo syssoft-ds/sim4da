@@ -91,8 +91,15 @@ public abstract class Node implements Simulator2Node {
         }
         catch (InterruptedException ignored) {};
     }
+    protected void sendControlVectorToNetwork(int randomRecipient, int[] controlVector)
+    {
+        simulator.sendControlVectorToNetwork(randomRecipient, controlVector);
+    }
 
-
+    protected synchronized HashMap<Integer, int[]> receiveControlVector(int Id)
+    {
+        return simulator.returnControlVector(Id);
+    }
 
     protected final int myId;
     protected int[] vector;
