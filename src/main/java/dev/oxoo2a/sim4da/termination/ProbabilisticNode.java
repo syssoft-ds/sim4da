@@ -16,10 +16,6 @@ public class ProbabilisticNode extends Node {
     public ProbabilisticNode(int my_id) {
         super(my_id);
         active = true;
-        localVector = new HashMap<>();
-        for (int i = 0; i < Main.n_nodes; i++) {
-            localVector.put(i, 0);
-        }
         V = new int[Main.n_nodes];
     }
 
@@ -40,37 +36,28 @@ public class ProbabilisticNode extends Node {
             if(m_raw == null) {
                 System.out.println("breaking");
             }
-
             m = Message.fromJson(m_raw.payload);
-
             String type = m.query("type");
+
             if(Objects.equals(type, "double_counting")) {
                 m = new Message();
                 m.add("sent", messagesSent);
                 m.add("received", messagesReceived);
                 sendUnicast(Main.double_count_coordinator_id, m);
+
             }else if(Objects.equals(type, "control_vector")){
-                System.out.println("NODE " + myId+ " RECEIVED CONTROL VECTOR MESSAGE");
                 String vector = m.query("vector");
-
-                System.out.print("NODE " + myId + " LOCAL VECTOR: ");
-
                 for (int i = 0; i < V.length; i++) {
                     System.out.print(i + ":" + V[i] + ";");
                 }
-                System.out.println("PARSING VECTOR");
-                // Parse Vector String and add to local vector V
+                // Parse Vector String, add with local vector V and create new Vector String
                 String newVectorString = parseVector(vector);
-                // Create new Vector String from local vector V
 
-
-                System.out.println("NODE " + myId + " REMOTE VECTOR " + vector);
-                System.out.println();
-                System.out.println("NODE " + myId + " NEW Vector String: " + newVectorString);
                 m = new Message();
                 m.add("type", "control_vector");
                 m.add("vector", newVectorString);
-                //TODO: Send Message around to each Node (as in TokenRingNode). Finally send back to Coordinator
+                //Send message in round trip as in TokenRingNode.java, except the last Node sends back to coordinator
+                //This architecture only works if all base nodes are initialized before coordinators.
                 receiver = myId==Main.n_nodes-1 ? Main.control_vector_coordinator_id : myId+1;
                 sendUnicast(receiver,m);
             }else{
@@ -81,14 +68,12 @@ public class ProbabilisticNode extends Node {
                     messagesReceived++;
                     active = true;
                 }
-
                 //emit("%d: activation == %d", myId, counter);
                 counter++;
                 m.add("counter", counter);
                 receiver = generateRandomNumber(Main.n_nodes, myId);
                 if(active){
                     Random rand = new Random();
-
                     if(rand.nextDouble()<Main.probability){
                         messagesSent++;
                         //increase receiver vector entry
@@ -97,7 +82,6 @@ public class ProbabilisticNode extends Node {
                     }else{
                         System.out.println(myId + " missed probability");
                     }
-
                     active = false;
                 }
             }
@@ -107,11 +91,9 @@ public class ProbabilisticNode extends Node {
     public static int generateRandomNumber(int range, int exclude) {
         Random rand = new Random();
         int randomNum;
-
         do {
             randomNum = rand.nextInt(range);
         } while (randomNum == exclude);
-
         return randomNum;
     }
 
@@ -124,8 +106,6 @@ public class ProbabilisticNode extends Node {
             int id = Integer.parseInt(subTokenizer.nextToken());
             int val = Integer.parseInt(subTokenizer.nextToken());
 
-            int result = V[id] + val;
-            System.out.println("RESULT FOR LOCAL VECTOR OF NODE " + myId +" FOR ENTRY " + id + " IS " + result);
             newV[id] = V[id] + val;
         }
         String newVectorString ="";
@@ -135,6 +115,4 @@ public class ProbabilisticNode extends Node {
         newVectorString = newVectorString + (newV.length-1)  +":" + newV[newV.length-1];
         return newVectorString;
     }
-
-
 }

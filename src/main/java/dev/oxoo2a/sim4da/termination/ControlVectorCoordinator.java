@@ -10,13 +10,10 @@ import java.util.StringTokenizer;
 
 public class ControlVectorCoordinator extends Node {
 
-    public static Map<Integer, Integer[]> clientVectors = new HashMap<>();
     boolean prompt = true;
     boolean finished = false;
 
-
     public ControlVectorCoordinator(int my_id) {
-
         super(my_id);
     }
 
@@ -24,18 +21,17 @@ public class ControlVectorCoordinator extends Node {
     protected void main() {
         while (true) {
             Message m;
-            //send round message
+            //send round message only after the message arrived back at coordinator (and in the beginning)
             if(prompt){
                 prompt=false;
                 m=new Message();
                 String vectorString="";
+                // At the start of the control vector round trip, initialize all entries to 0
                 for (int i = 0; i < Main.n_nodes-1; i++) {
                     String subString = i+":"+0+";";
                     vectorString = vectorString+subString;
                 }
                 vectorString = vectorString + (Main.n_nodes-1)+ ":" + 0;
-                System.out.println("VectorString");
-                System.out.println(vectorString);
                 m.add("type" , "control_vector");
                 m.add("vector",  vectorString);
                 sendUnicast(0,m);
@@ -58,28 +54,17 @@ public class ControlVectorCoordinator extends Node {
                     int value = Integer.parseInt(subTokenizer.nextToken());
                     if(value != 0){
                         finished = false;
-                        System.out.println("FOUND VALUE NOT 0 -> NOT FINISHED");
                         break;
                     }
                 }
-                System.out.println("Finished is " + finished);
                 if(finished){
-                    System.out.println("CONTROL VECTOR SAYS SIMULATION DONE");
+                    System.out.println("CONTROL VECTOR SAYS SYSTEM TERMINATED");
                     System.exit(0);
                 }else{
-                   prompt = true;
+                    // restart trailing control vector
+                    prompt = true;
                 }
-
             }
-
-
-
-
-
-
         }
-
     }
-
-
 }
