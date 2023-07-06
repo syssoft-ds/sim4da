@@ -8,6 +8,7 @@ public class MessageNameHelper {
     public static String ID= "ID";
     public static String messagesSend= "messagesSend";
     public static String messagesReceived= "messagesReceived";
+    public static String controlVector= "controlVector";
 
 
 }

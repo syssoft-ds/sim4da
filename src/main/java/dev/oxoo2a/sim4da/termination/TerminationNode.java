@@ -10,27 +10,27 @@ import java.util.Random;
 public class TerminationNode extends Node {
 
 
-    private int intervallBetweenNewProcedure;
-    private long timeSinceLastUpdate=0;
+    private final int intervallBetweenNewProcedure;
+    private long timeSinceLastUpdate;
     private CurrentState currentState;
-    private int numberOfBaseNodes;
+    private final int numberOfBaseNodes;
     private int firstIterMessagesSend=0;
     private int firstIterMessagesReceived=0;
     private int secondIterMessagesSend=0;
     private int secondIterMessagesReceived=0;
     private int answerReceivedOnFirstIter=0;
     private int answersReceivedOnSecondIter=0;
+    private final TerminationType terminationType;
 
 
-
-    public TerminationNode(int my_id, int numberOfBaseNodes, int intervallBetweenNewProcedure) {
+    public TerminationNode(int my_id, int numberOfBaseNodes, int intervallBetweenNewProcedure, TerminationType terminationType) {
         super(my_id);
         currentState= CurrentState.IDLE;
         this.numberOfBaseNodes= numberOfBaseNodes;
         this.intervallBetweenNewProcedure= intervallBetweenNewProcedure;
         Random rand= new Random(11111+my_id);
         timeSinceLastUpdate= rand.nextInt(1000);
-
+        this.terminationType=terminationType;
 
     }
 
@@ -38,57 +38,9 @@ public class TerminationNode extends Node {
     @Override
     protected void main() {
 
-        Message m = new Message();
-
-        while (true){
-
-            if(currentState== CurrentState.waitingForAnwersOnFirstRequest|| currentState== CurrentState.waitingForAnswersOnSecondRequest) {
-                Network.Message m_raw = receive();
-                if (m_raw == null) break;
-                m = Message.fromJson(m_raw.payload);
-                if(m.getMap().containsKey(MessageNameHelper.specialAnswer)){
-                    String iteration= m.getMap().get(MessageNameHelper.iteration);
-                    String send= m.getMap().get(MessageNameHelper.messagesSend);
-                    String received= m.getMap().get(MessageNameHelper.messagesReceived);
-                    addAccordingToIteration(iteration, send, received);
-                }
-
-
-            }
-            if(currentState== CurrentState.IDLE && TimeManager.getCurrentSimTime()- timeSinceLastUpdate> intervallBetweenNewProcedure){
-                System.out.println("Am IDLE, sending first Request");
-                currentState= CurrentState.waitingForAnwersOnFirstRequest;
-                sendRequestToAll("first");
-
-            }else if(currentState== CurrentState.waitingForAnwersOnFirstRequest){
-                if(receivedAllMessages()){
-                    System.out.println("Am waiting first request but received All, sending second now" +
-                            "\n values are "+
-                            "\n firstIterMessagesSend: "+ firstIterMessagesSend+
-                            "\nfirstIterMessagesReceived: "+firstIterMessagesReceived);
-                    currentState= CurrentState.waitingForAnswersOnSecondRequest;
-                    answerReceivedOnFirstIter=0;
-                    sendRequestToAll("second");
-
-                }else{
-                    System.out.println("Not all answers received on First, currently: "+ answerReceivedOnFirstIter);
-                }
-            }else if(currentState== CurrentState.waitingForAnswersOnSecondRequest){
-                if(receivedAllMessages()){
-                    timeSinceLastUpdate= TimeManager.getCurrentSimTime();
-                    currentState= CurrentState.IDLE;
-                    answersReceivedOnSecondIter=0;
-                    checkForTermination();
-                }else{
-                    System.out.println("Not all answers received on Second, currently: "+ answersReceivedOnSecondIter);
-
-                }
-
-            }
-
-
-
-
+        switch (terminationType){
+            case countProcedure -> actAsCountProcedureNode();
+            case vector -> actAsControlVectorNode();
         }
 
 
@@ -159,5 +111,113 @@ public class TerminationNode extends Node {
         firstIterMessagesReceived=0;
         secondIterMessagesReceived=0;
         secondIterMessagesSend=0;
+    }
+
+    public void actAsControlVectorNode(){
+        controlVectorInstance = buildControlVectorString();
+        Message m;
+        while(true) {
+
+            if (currentState == CurrentState.IDLE && TimeManager.getCurrentSimTime() - timeSinceLastUpdate > intervallBetweenNewProcedure) {
+                System.out.println("Sending controlVector");
+                currentState = CurrentState.waitingForAnwersOnFirstRequest;
+                m = new Message();
+                m.getMap().put(MessageNameHelper.specialRequest, "true");
+                m.getMap().put(MessageNameHelper.controlVector, controlVectorInstance);
+                m.getMap().put(MessageNameHelper.ID, String.valueOf(myId));
+                sendUnicast(0, m);
+
+            } else if (currentState == CurrentState.waitingForAnwersOnFirstRequest) {
+
+                Network.Message m_raw = receive();
+                if (m_raw == null) break;
+                m = Message.fromJson(m_raw.payload);
+
+                if(m.getMap().containsKey(MessageNameHelper.specialAnswer)){
+                    timeSinceLastUpdate= TimeManager.getCurrentSimTime();
+                    currentState= CurrentState.IDLE;
+                    String vector= m.getMap().get(MessageNameHelper.controlVector);
+                    isNullVector(vector);
+                }else{
+                    throw new IllegalStateException("Something went wrong");
+                }
+            }
+        }
+
+
+
+
+    }
+    String controlVectorInstance;
+
+    private String buildControlVectorString(){
+        String controlVectorAsString="";
+        for(int i=0; i< numberOfBaseNodes; i++){
+            controlVectorAsString+= "+:"+ 0 +";";
+        }
+        return controlVectorAsString;
+    }
+    private void isNullVector(String vector){
+        int[] vectorAsInt= Utils.getVectorFromString(vector, numberOfBaseNodes);
+        for(int i =0 ; i< vectorAsInt.length; i++) {
+            if (vectorAsInt[i] != 0) {
+                System.out.println("Control Vector is not 0 for Node "+ i);
+                System.out.println("Size "+ vectorAsInt.length);
+                return;
+            }
+        }
+        System.out.println("Control Vector is nullVector, termination found by Terminator "+ (myId-numberOfBaseNodes));
+        System.exit(0);
+    }
+    public void actAsCountProcedureNode(){
+
+        Message m = new Message();
+
+        while (true){
+
+            if(currentState== CurrentState.waitingForAnwersOnFirstRequest|| currentState== CurrentState.waitingForAnswersOnSecondRequest) {
+                Network.Message m_raw = receive();
+                if (m_raw == null) break;
+                m = Message.fromJson(m_raw.payload);
+                if(m.getMap().containsKey(MessageNameHelper.specialAnswer)){
+                    String iteration= m.getMap().get(MessageNameHelper.iteration);
+                    String send= m.getMap().get(MessageNameHelper.messagesSend);
+                    String received= m.getMap().get(MessageNameHelper.messagesReceived);
+                    addAccordingToIteration(iteration, send, received);
+                }
+
+
+            }
+            if(currentState== CurrentState.IDLE && TimeManager.getCurrentSimTime()- timeSinceLastUpdate> intervallBetweenNewProcedure){
+                System.out.println("Am IDLE, sending first Request");
+                currentState= CurrentState.waitingForAnwersOnFirstRequest;
+                sendRequestToAll("first");
+
+            }else if(currentState== CurrentState.waitingForAnwersOnFirstRequest){
+                if(receivedAllMessages()){
+                    System.out.println("Am waiting first request but received All, sending second now" +
+                            "\n values are "+
+                            "\n firstIterMessagesSend: "+ firstIterMessagesSend+
+                            "\nfirstIterMessagesReceived: "+firstIterMessagesReceived);
+                    currentState= CurrentState.waitingForAnswersOnSecondRequest;
+                    answerReceivedOnFirstIter=0;
+                    sendRequestToAll("second");
+
+                }else{
+                    System.out.println("Not all answers received on First, currently: "+ answerReceivedOnFirstIter);
+                }
+            }else if(currentState== CurrentState.waitingForAnswersOnSecondRequest){
+                if(receivedAllMessages()){
+                    timeSinceLastUpdate= TimeManager.getCurrentSimTime();
+                    currentState= CurrentState.IDLE;
+                    answersReceivedOnSecondIter=0;
+                    checkForTermination();
+                }else{
+                    System.out.println("Not all answers received on Second, currently: "+ answersReceivedOnSecondIter);
+
+                }
+
+            }
+        }
     }
 }

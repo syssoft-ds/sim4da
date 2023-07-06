@@ -27,59 +27,15 @@ public abstract class LogicalClockNode extends Node implements LogicalClock{
         initClock();
 
     }
-    public int getNumberExceptSelf(){
-       while(true){
-           int id= random.nextInt(Main.n_nodes);
-           if(id != myId)
-               return id;
-       }
-    }
-    public double calculateNewProbability(){
-        probability*= Math.exp(-constant * messagesSend);
-        return probability;
-    }
+
+
 
     @Override
     protected void main() {
         Message m;
 
-        double ran= random.nextDouble();
-        calculateNewProbability();
-        System.out.println(myId+" probabilities are "+ ran+" < "+ probability);
 
-        if(ran< calculateNewProbability()) {
-            m = initMessage();
-            assert m != null;
-            sendUnicast(getNumberExceptSelf(), m);
-            messagesSend++;
 
-        }else{
-            System.out.println(myId+" will not send a message at start");
-        }
-        isActive=false;
-        while (true){
-
-            Network.Message m_raw = receive();
-            if(m_raw == null) break;
-            else isActive=true;
-            m = receiving(Message.fromJson(m_raw.payload));
-
-            int counter = Integer.parseInt(m.query(IDNameHelper.counter));
-            emit("%d: counter == %d", myId, counter);
-            counter++;
-            m.add(IDNameHelper.counter, counter);
-            double first =random.nextDouble();
-            calculateNewProbability();
-            System.out.println(myId+" probabilities are "+ first+" < "+ probability);
-            if(isActive&&first< probability) {
-                System.out.println(myId+" sending now ");
-                messagesSend++;
-                sending(m);
-            }else{
-                System.out.println(myId+" will not send a message");
-            }
-
-        }
     }
 
     @Override
@@ -154,9 +110,7 @@ public abstract class LogicalClockNode extends Node implements LogicalClock{
             int myTime= clockTime.get(IDNameHelper.computerIDTime +myId);
             clockTime.put(IDNameHelper.computerIDTime +myId, ++myTime);
             m.getMap().put(IDNameHelper.computerIDTime +myId, String.valueOf(myTime));
-            int id= getNumberExceptSelf();
-            System.out.println(myId +" sending to "+ id);
-            sendUnicast(id,m);
+
             return;
         }else if(my_ClockType.isAssignableFrom(LamportClockNode.class)){
 
@@ -165,7 +119,6 @@ public abstract class LogicalClockNode extends Node implements LogicalClock{
             clockTime.put(IDNameHelper.lamportClock, newClockTime);
             m.add(IDNameHelper.computerID, myId);
 
-            sendUnicast(getNumberExceptSelf(),m);
             return;
         }
 
