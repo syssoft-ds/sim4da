@@ -1,16 +1,23 @@
 package dev.oxoo2a.sim4da.logicalClocks;
 
+import dev.oxoo2a.sim4da.Main;
 import dev.oxoo2a.sim4da.Message;
 import dev.oxoo2a.sim4da.Network;
 import dev.oxoo2a.sim4da.Node;
 
 import java.util.HashMap;
+import java.util.Random;
 
 public abstract class LogicalClockNode extends Node implements LogicalClock{
 
     private Class<?extends LogicalClockNode> my_ClockType;
     private HashMap<String, Integer> clockTime= new HashMap<>();
     public int knowledgeOfTheTotalAmountOfNodes;
+    private boolean isActive=true;
+    private Random random= new Random();
+    private double probability=1.0;
+    private double constant= 0.02;
+    private int messagesSend=1; //starting at 0 results in probability of 1 when using exponentialfunction -> that would mean every node sends a message at the start
 
 
     public LogicalClockNode(int my_id, Class<?extends LogicalClockNode> my_ClockType, int knowledgeOfTheTotalAmountOfNodes) {
@@ -20,30 +27,57 @@ public abstract class LogicalClockNode extends Node implements LogicalClock{
         initClock();
 
     }
+    public int getNumberExceptSelf(){
+       while(true){
+           int id= random.nextInt(Main.n_nodes);
+           if(id != myId)
+               return id;
+       }
+    }
+    public double calculateNewProbability(){
+        probability*= Math.exp(-constant * messagesSend);
+        return probability;
+    }
 
     @Override
     protected void main() {
         Message m;
 
-        if(myId == 0){
+        double ran= random.nextDouble();
+        calculateNewProbability();
+        System.out.println(myId+" probabilities are "+ ran+" < "+ probability);
 
+        if(ran< calculateNewProbability()) {
             m = initMessage();
             assert m != null;
-            sendUnicast(1, m);
+            sendUnicast(getNumberExceptSelf(), m);
+            messagesSend++;
 
+        }else{
+            System.out.println(myId+" will not send a message at start");
         }
+        isActive=false;
         while (true){
 
             Network.Message m_raw = receive();
             if(m_raw == null) break;
+            else isActive=true;
             m = receiving(Message.fromJson(m_raw.payload));
 
             int counter = Integer.parseInt(m.query(IDNameHelper.counter));
             emit("%d: counter == %d", myId, counter);
             counter++;
             m.add(IDNameHelper.counter, counter);
-
-            sending(m);
+            double first =random.nextDouble();
+            calculateNewProbability();
+            System.out.println(myId+" probabilities are "+ first+" < "+ probability);
+            if(isActive&&first< probability) {
+                System.out.println(myId+" sending now ");
+                messagesSend++;
+                sending(m);
+            }else{
+                System.out.println(myId+" will not send a message");
+            }
 
         }
     }
@@ -120,8 +154,9 @@ public abstract class LogicalClockNode extends Node implements LogicalClock{
             int myTime= clockTime.get(IDNameHelper.computerIDTime +myId);
             clockTime.put(IDNameHelper.computerIDTime +myId, ++myTime);
             m.getMap().put(IDNameHelper.computerIDTime +myId, String.valueOf(myTime));
-
-            sendUnicast((myId + 1) % numberOfNodes(),m);
+            int id= getNumberExceptSelf();
+            System.out.println(myId +" sending to "+ id);
+            sendUnicast(id,m);
             return;
         }else if(my_ClockType.isAssignableFrom(LamportClockNode.class)){
 
@@ -130,7 +165,7 @@ public abstract class LogicalClockNode extends Node implements LogicalClock{
             clockTime.put(IDNameHelper.lamportClock, newClockTime);
             m.add(IDNameHelper.computerID, myId);
 
-            sendUnicast((myId + 1) % numberOfNodes(),m);
+            sendUnicast(getNumberExceptSelf(),m);
             return;
         }
 
