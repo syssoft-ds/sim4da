@@ -2,22 +2,36 @@ package dev.oxoo2a.sim4da;
 
 import dev.oxoo2a.sim4da.logicalClocks.LamportClockNode;
 import dev.oxoo2a.sim4da.logicalClocks.VectorClockNode;
+import dev.oxoo2a.sim4da.termination.BaseAktorNode;
+import dev.oxoo2a.sim4da.termination.TerminationNode;
+import dev.oxoo2a.sim4da.termination.TimeManager;
 
 public class Main {
 
     public static void main(String[] args) {
 
+        TimeManager.setTimer();
 
-        int n_nodes = 5;
+        int n_terminator = 2;
+        int n_nodes = 150;
+        int allNodes= n_nodes+ n_terminator;
 
-        ClockTypeToUse clockTypeToUse = ClockTypeToUse.lamportClock;
+        ClockTypeToUse clockTypeToUse = ClockTypeToUse.vectorClock;
 
-        Simulator s = Simulator.createDefaultSimulator(n_nodes);
+        Simulator s = Simulator.createDefaultSimulator(allNodes);
         /*for (int id=0; id<n_nodes; id++) {
             Node n = new TokenRingNode(id);
             s.attachNode(id,n);
         }*/
-
+        for (int id=0; id<n_nodes; id++) {
+            Node n = new BaseAktorNode(id, n_nodes, 0.99);
+            s.attachNode(id,n);
+        }
+        for (int id=n_nodes; id<allNodes; id++) {
+            Node n = new TerminationNode(id, n_nodes, 1000);
+            s.attachNode(id,n);
+        }
+/*
         switch (clockTypeToUse){
             case lamportClock -> {
                 for (int id=0; id<n_nodes; id++) {
@@ -32,11 +46,13 @@ public class Main {
                 }
             }
         }
+        */
+
 
 
 
         try{
-            s.runSimulation(5);
+            s.runSimulation(Integer.MAX_VALUE);
         }catch (InstantiationException e){
             System.err.println("Instantiation failed. Time to investigate.");
         }
