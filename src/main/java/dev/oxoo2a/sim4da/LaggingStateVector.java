@@ -1,5 +1,6 @@
 package dev.oxoo2a.sim4da;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class LaggingStateVector {
@@ -17,7 +18,7 @@ public class LaggingStateVector {
         }
         vectorClock[senderId]++;
 
-        // Überprüfe auf Terminierung anhand des nachlaufenden Kontrollvektors
+        // Check termination based on the lagging state vector
         for (int i = 0; i < numActors; i++) {
             if (i != senderId && vectorClock[i] == vectorClock[senderId] - 1) {
                 vectorClock[i]++;
@@ -31,5 +32,14 @@ public class LaggingStateVector {
                 return false;
         }
         return true;
+    }
+
+    public int[] getVectorClock() {
+        return vectorClock.clone();
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(vectorClock);
     }
 }

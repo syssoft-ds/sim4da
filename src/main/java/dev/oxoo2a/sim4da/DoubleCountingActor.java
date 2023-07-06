@@ -7,8 +7,10 @@ public class DoubleCountingActor {
     private Set<Integer> receivedMessages;
     private Set<Integer> terminatedActors;
     private int count;
+    private int numActors;
 
-    public DoubleCountingActor() {
+    public DoubleCountingActor(int numActors) {
+        this.numActors = numActors;
         receivedMessages = new HashSet<>();
         terminatedActors = new HashSet<>();
         count = 0;
@@ -16,10 +18,10 @@ public class DoubleCountingActor {
 
     public void receiveMessage(int senderId) {
         receivedMessages.add(senderId);
-        System.out.println("Actor " + senderId + " received a message.");
+        //System.out.println("Actor " + senderId + " received a message.");
 
-        // Überprüfe auf Terminierung anhand der empfangenen Nachrichten
-        if (receivedMessages.size() == count) {
+        // Check termination based on the received messages
+        if (receivedMessages.size() == numActors) {
             actorTerminated(1);
         }
     }
@@ -30,10 +32,14 @@ public class DoubleCountingActor {
             count++;
         }
 
-        System.out.println("Actor " + numTerminatedActors + " inactive.");
+        if (terminatedActors.size() == numActors) {
+            System.out.println("All actors have terminated.");
+        } //else {
+        //   System.out.println("Actor " + numTerminatedActors + " inactive.");
+        //}
     }
 
     public boolean hasTerminated() {
-        return terminatedActors.size() == count;
+        return terminatedActors.size() == numActors;
     }
 }
