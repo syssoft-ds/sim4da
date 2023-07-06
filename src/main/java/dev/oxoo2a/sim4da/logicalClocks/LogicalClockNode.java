@@ -1,23 +1,16 @@
 package dev.oxoo2a.sim4da.logicalClocks;
 
-import dev.oxoo2a.sim4da.Main;
 import dev.oxoo2a.sim4da.Message;
 import dev.oxoo2a.sim4da.Network;
 import dev.oxoo2a.sim4da.Node;
 
 import java.util.HashMap;
-import java.util.Random;
 
 public abstract class LogicalClockNode extends Node implements LogicalClock{
 
     private Class<?extends LogicalClockNode> my_ClockType;
     private HashMap<String, Integer> clockTime= new HashMap<>();
     public int knowledgeOfTheTotalAmountOfNodes;
-    private boolean isActive=true;
-    private Random random= new Random();
-    private double probability=1.0;
-    private double constant= 0.02;
-    private int messagesSend=1; //starting at 0 results in probability of 1 when using exponentialfunction -> that would mean every node sends a message at the start
 
 
     public LogicalClockNode(int my_id, Class<?extends LogicalClockNode> my_ClockType, int knowledgeOfTheTotalAmountOfNodes) {
@@ -28,14 +21,31 @@ public abstract class LogicalClockNode extends Node implements LogicalClock{
 
     }
 
-
-
     @Override
     protected void main() {
         Message m;
 
+        if(myId == 0){
 
+            m = initMessage();
+            assert m != null;
+            sendUnicast(1, m);
 
+        }
+        while (true){
+
+            Network.Message m_raw = receive();
+            if(m_raw == null) break;
+            m = receiving(Message.fromJson(m_raw.payload));
+
+            int counter = Integer.parseInt(m.query(IDNameHelper.counter));
+            emit("%d: counter == %d", myId, counter);
+            counter++;
+            m.add(IDNameHelper.counter, counter);
+
+            sending(m);
+
+        }
     }
 
     @Override
@@ -111,6 +121,7 @@ public abstract class LogicalClockNode extends Node implements LogicalClock{
             clockTime.put(IDNameHelper.computerIDTime +myId, ++myTime);
             m.getMap().put(IDNameHelper.computerIDTime +myId, String.valueOf(myTime));
 
+            sendUnicast((myId + 1) % numberOfNodes(),m);
             return;
         }else if(my_ClockType.isAssignableFrom(LamportClockNode.class)){
 
@@ -119,6 +130,7 @@ public abstract class LogicalClockNode extends Node implements LogicalClock{
             clockTime.put(IDNameHelper.lamportClock, newClockTime);
             m.add(IDNameHelper.computerID, myId);
 
+            sendUnicast((myId + 1) % numberOfNodes(),m);
             return;
         }
 
