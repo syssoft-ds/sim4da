@@ -9,6 +9,7 @@ public class Network {
     public Network ( int n_nodes, Tracer tracer ) {
         this.n_nodes = n_nodes;
         this.tracer = tracer;
+        cmq_dc = new ControlMessageQueue();
         mqueues = new MessageQueue[n_nodes];
         for (int i=0; i<n_nodes; ++i)
             mqueues[i] = new MessageQueue();
@@ -73,7 +74,9 @@ public class Network {
                     }
                 }
                 catch (InterruptedException e) {};
+
             }
+
         }
 
         public void stop () {
@@ -85,6 +88,7 @@ public class Network {
         private final Semaphore await_message;
         private boolean stop;
     }
+
 
     public void unicast ( int sender_id, int receiver_id, String message ) {
         if ((receiver_id < 0) || (receiver_id >= n_nodes)) {
@@ -127,6 +131,14 @@ public class Network {
         return m;
     }
 
+    public void addToControlQueue(ControlMessage controlMessage) {
+        cmq_dc.put(controlMessage);
+    }
+
+   synchronized ControlMessage getControlMessage(int id) {
+            return cmq_dc.get(id);
+    }
+
     public void stop () {
         for ( MessageQueue mq : mqueues )
             mq.stop();
@@ -135,8 +147,7 @@ public class Network {
     private final int n_nodes;
     private final Tracer tracer;
     private final MessageQueue[] mqueues;
-
+    protected ControlMessageQueue cmq_dc;
     private static final Random rgen = new Random();
 
-    //private static Logger logger = Logger.getRootLogger();
 }

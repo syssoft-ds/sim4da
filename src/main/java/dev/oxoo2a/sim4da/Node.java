@@ -1,13 +1,16 @@
 package dev.oxoo2a.sim4da;
 import java.lang.IllegalArgumentException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Random;
 
 public abstract class Node implements Simulator2Node {
 
     public Node (int my_id ) {
         this.myId = my_id;
         t_main = new Thread(this::main);
+        t_main.setName("Node" + Integer.toString(my_id));
     }
 
     @Override
@@ -29,6 +32,9 @@ public abstract class Node implements Simulator2Node {
         }
 
 
+    }
+    synchronized void sendControlMessage(ControlMessage controlMessage)  {
+        simulator.passControlMessage(controlMessage);
     }
 
     @Override
@@ -68,6 +74,10 @@ public abstract class Node implements Simulator2Node {
         return simulator.receive(myId);
     }
 
+    protected ControlMessage receiveControlMessage(int id)  {
+       return simulator.receiveControlMessage(id);
+    };
+
     protected void emit (String format, String logType,  Object ... args ) {
         simulator.emit(format,logType,args);
     }
@@ -82,7 +92,10 @@ public abstract class Node implements Simulator2Node {
         catch (InterruptedException ignored) {};
     }
 
+
+
     protected final int myId;
+    protected int[] vector;
     protected Node2Simulator simulator;
     private final Thread t_main;
     protected Clock clock;

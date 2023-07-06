@@ -4,10 +4,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.io.PrintStream;
 import java.util.Map;
+import java.util.Set;
 
 public class Simulator implements Node2Simulator {
 
-    public static Simulator createDefaultSimulator ( int n_nodes ) {
+
+
+    public static Simulator createDefaultSimulator (int n_nodes ) {
         return new Simulator(n_nodes, "sim4da", true, true, true, System.out);
     }
 
@@ -18,6 +21,8 @@ public class Simulator implements Node2Simulator {
     public Simulator ( int n_nodes, String name, boolean ordered, boolean enableTracing, boolean useLog4j2, PrintStream alternativeDestination ) {
         this.n_nodes = n_nodes;
         tracer = new Tracer(name,ordered,enableTracing,useLog4j2,alternativeDestination);
+        doubleCountTerminator = new DoubleCountTerminator(n_nodes);
+        doubleCountTerminator.setSimulator(this);
         network = new Network(n_nodes,tracer);
         nodes = new HashMap<Integer, Simulator2Node>(n_nodes);
         for (int n_id = 0; n_id < n_nodes; ++n_id)
@@ -34,7 +39,7 @@ public class Simulator implements Node2Simulator {
             nodes.replace(id,node);
     }
 
-    public void runSimulation (int duration, String type) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    public void runSimulation (int duration, String type) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, InterruptedException {
         // Check that all nodes are attached
         /*for (Simulator2Node n : nodes.values()) {
             if (n == null) throw new InstantiationException();
@@ -52,21 +57,27 @@ public class Simulator implements Node2Simulator {
         tracer.emit("main","Simulator::runSimulation with %d nodes for %d seconds",n_nodes,duration);
         is_simulating = true;
         nodes.values().forEach(Simulator2Node::start);
+        doubleCountTerminator.start();
         // Wait for the required duration
         try {
             Thread.sleep(duration * 1000L);
         }
         catch (InterruptedException ignored) {}
         is_simulating = false;
-
+        doubleCountTerminator.stop();
+        doubleCountTerminator.end();
         // Stop network - release nodes waiting in receive ...
         network.stop();
-
         // Tell all nodes to stop and wait for the threads to terminate
         nodes.values().forEach(Simulator2Node::stop);
+
         tracer.emit("main","Simulator::runSimulation finished");
     }
 
+    public void updateStatus()
+    {
+        is_simulating = false;
+    }
     @Override
     public boolean stillSimulating() {
         return is_simulating;
@@ -93,15 +104,31 @@ public class Simulator implements Node2Simulator {
     }
 
     @Override
+    public synchronized void passControlMessage(ControlMessage controlMessage) {
+        emit("sent a control message to the observer from %d", "doublecount", controlMessage.getId());
+        doubleCountTerminator.update(controlMessage);
+    }
+
+    @Override
+    public ControlMessage receiveControlMessage(int id) {
+        return network.getControlMessage(id);
+    }
+
+    @Override
     public Network.Message receive ( int receiver_id ) {
         return network.receive(receiver_id);
+    }
+    @Override
+    public void sendControlMessage(ControlMessage controlMessage) {
+        emit("sent a control message to the node %d", "clock", controlMessage.getId());
+        network.addToControlQueue(controlMessage);
     }
 
     @Override
     public void emit (String format, String logType, Object ... args) {
         tracer.emit(format,logType, args);
     }
-
+    private DoubleCountTerminator doubleCountTerminator;
     private final int n_nodes;
     private final Tracer tracer;
     private final Network network;
