@@ -4,8 +4,34 @@ import java.util.Random;
 
 public class Actor extends Node{
 
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
     private boolean isActive = false;
+
+    public int getReceived() {
+        return received;
+    }
+
+    public void setReceived(int received) {
+        this.received = received;
+    }
+
     private int received = 0;
+
+    public int getSent() {
+        return sent;
+    }
+
+    public void setSent(int sent) {
+        this.sent = sent;
+    }
+
     private int sent = 0;
 
     public float getProbability() {
@@ -15,13 +41,13 @@ public class Actor extends Node{
     public void setProbability(float probability) {
         this.probability = probability;
         if (probability > 1f)
-            probability = 1f;
+            this.probability  = 1f;
         else if (probability < 0f)
-            probability = 0f;
+            this.probability  = 0f;
     }
 
     private float probability = 1.0f;
-    final float convergence = 0.1f;
+    final float convergence = 0.00005f;
 
     public Actor(int my_id) {
         super(my_id, false);
@@ -34,7 +60,8 @@ public class Actor extends Node{
     @Override
     protected void main() {
 
-        Message u_cast = new Message().add("Sender",myId);
+        Message basic_cast = new Message().add("Sender",myId).add("isControl", "false");
+        Message control_cast = new Message().add("Sender",myId).add("isControl", "true");
 
         // random decides if actor should be active on simulation start
         Random r = new Random();
@@ -42,18 +69,33 @@ public class Actor extends Node{
 
         // (myId == 0) makes sure the simulation runs and not all actors are inactive by chance
         if (myId == 0 || random >= 0.7f)
-            shouldSend(u_cast);
+            shouldSend(basic_cast);
 
         while (stillSimulating()) {
             // receiving
             Network.Message m_raw = receive();
             if (m_raw == null) break; // Null == Node2Simulator time ends while waiting for a message
-            received++;
-            isActive = true;
+
+            Message m_json = Message.fromJson(m_raw.payload);
+            boolean isControl = Boolean.parseBoolean(m_json.query("isControl"));
 
             // sending
-            shouldSend(u_cast);
+            if (!isControl) {
+                received++;
+                isActive = true;
+                shouldSend(basic_cast);
+            // send control
+            }else{
+                int controlID = Integer.parseInt(m_json.query("Sender"));
+                if (controlID == myId)
+                    continue;
+                control_cast.add("sent", sent);
+                control_cast.add("received", received);
+                control_cast.add("isActive", isActive ? "true" : "false");
+                sendUnicast(controlID, control_cast);
+            }
         }
+
     }
 
     private void shouldSend(Message u_cast){
@@ -69,8 +111,10 @@ public class Actor extends Node{
 
     private void sendMessageToRandom(Message u_cast){
         Random r = new Random();
-        int random = r.nextInt(numberOfNodes()-1) ;
-        sendUnicast(random, u_cast);
+        int random = r.nextInt(numberOfNodes()-1) +1 ;
         sent++;
+
+        sendUnicast(random, u_cast);
     }
+
 }

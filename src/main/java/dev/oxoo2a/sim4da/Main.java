@@ -4,7 +4,7 @@ public class Main {
 
     public static void main(String[] args) {
         int n_nodes = 5;
-        int duration = 5;
+        int duration = 16;
         Simulator s = Simulator.createDefaultSimulator(n_nodes);
 
         for (int id=0; id<n_nodes; id++) {
@@ -13,11 +13,16 @@ public class Main {
             TokenRingNode n = new TokenRingNode(id, new LamportClock());
             */
 
-            // u2 sending messages with Actors and detect termination
-            Actor n = new Actor(id);
-            s.attachNode(id,n);
+            if (id == 0) {
+                // u2  Double Count Actors that detects termination
+                DoubleCountActor first = new DoubleCountActor(id);
+                s.attachNode(id, first);
+            } else {
+                // u2 sending messages with Actors and detect termination
+                Actor n = new Actor(id);
+                s.attachNode(id, n);
+            }
         }
-
         try {
             s.runSimulation(duration);
         } catch (InstantiationException e) {
