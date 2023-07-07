@@ -199,24 +199,27 @@ public class TerminationNode extends Node {
 
     /**
      * wenn das in der main aufgerufen wird, verhält sich die kontroll node entlang des kontrollvektorverfahrens
-     * ist die node IDLE wartet sie auf keine Antworten und schickt wenn das itnervall x seit dem ende des letzten verfahrens rum ist einen neuen kontrollvektor los
-     * ist die node am warten hat sie irgendwann einen Kontrollvektor an die erste Base Node mit der ID 0 gesendet und wartet nun auf die antwort der letzten Base Node,
-     * die den Kontrollvektor wieder zurücksendet um dann zu schauen ob dies der Nullvektor ist
+     * zu beginn ist die Node Idle und sendet nach zeit x einen komntrollvektor zur base node 0
+     * dann wartet sie darauf, dass der kontrollvektor bei allen nodes war, und prüft, wenn sie ihn von der letzten node zurückbekommt, ob es der nullvektor ist, sonst schickt sie den
+     * gleichen vektor der zurück kam wieder an die Node 0
      */
+
     public void actAsControlVectorNode(){
         String controlVectorInstance = buildControlVectorString();
         Message m;
         while(true) {
 
             if (currentState == CurrentState.IDLE && TimeManager.getCurrentSimTime() - timeSinceLastUpdate > intervallBetweenNewProcedure) {
-                System.out.println("Terminator "+(myId-numberOfBaseNodes)+
-                        ": Sending controlVector: sim Time"+ TimeManager.getCurrentSimTime());
-                currentState = CurrentState.waiting;
-                m = new Message();
-                m.getMap().put(MessageNameHelper.specialRequest, "true");
-                m.getMap().put(MessageNameHelper.controlVector, controlVectorInstance);
-                m.getMap().put(MessageNameHelper.ID, String.valueOf(myId));
-                sendUnicast(0, m);
+
+                    System.out.println("Terminator " + (myId - numberOfBaseNodes) +
+                            ": Sending controlVector: sim Time" + TimeManager.getCurrentSimTime());
+                    currentState = CurrentState.waiting;
+                    m = new Message();
+                    m.getMap().put(MessageNameHelper.specialRequest, "true");
+                    m.getMap().put(MessageNameHelper.controlVector, controlVectorInstance);
+                    m.getMap().put(MessageNameHelper.ID, String.valueOf(myId));
+                    sendUnicast(0, m);
+
 
             } else if (currentState == CurrentState.waiting) {
 
@@ -225,10 +228,17 @@ public class TerminationNode extends Node {
                 m = Message.fromJson(m_raw.payload);
 
                 if(m.getMap().containsKey(MessageNameHelper.specialAnswer)){
+
                     timeSinceLastUpdate= TimeManager.getCurrentSimTime();
-                    currentState= CurrentState.IDLE;
                     String vector= m.getMap().get(MessageNameHelper.controlVector);
                     isNullVector(vector);
+                    m= new Message();
+                    m.getMap().put(MessageNameHelper.ID, String.valueOf(myId));
+                    m.getMap().put(MessageNameHelper.specialRequest,"true");
+                    m.getMap().put(MessageNameHelper.controlVector, vector);
+                    System.out.println("Terminator " + (myId - numberOfBaseNodes) +
+                            ": Sending controlVector again: sim Time" + TimeManager.getCurrentSimTime());
+                    sendUnicast(0, m);
                 }else{
                     throw new IllegalStateException("Something went wrong");
                 }

@@ -63,7 +63,7 @@ public class BaseAktorNode extends Node
 
                 messagesReceived++;
 
-                if(rand.nextDouble()< probability){
+                if(Double.compare(rand.nextDouble(),probability)<0){
 
                     messagesSend++;
                     m.getMap().put(MessageNameHelper.ID, String.valueOf(myId));
@@ -111,7 +111,7 @@ public class BaseAktorNode extends Node
 
             if(m.getMap().containsKey(MessageNameHelper.baseMessage)){
                 onReceive();
-                    if (rand.nextDouble() < probability) {
+                    if (Double.compare(rand.nextDouble(),probability)<0) {
                         m= new Message();
                         m.getMap().put(MessageNameHelper.ID, String.valueOf(myId));
                         m.getMap().put(MessageNameHelper.baseMessage, "true");
@@ -129,6 +129,7 @@ public class BaseAktorNode extends Node
                     m= new Message();
                     m.getMap().put(MessageNameHelper.ID, IDofTerminator);
                     m.getMap().put(MessageNameHelper.controlVector, newControlVector);
+                    localVector= new int[numberOfNodes];
                     if(myId == numberOfNodes-1){
                         System.out.println("As im the last node i return controlvector to controller");
                         m.getMap().put(MessageNameHelper.specialAnswer, "true");
