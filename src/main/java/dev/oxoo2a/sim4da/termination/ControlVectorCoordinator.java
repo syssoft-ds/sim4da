@@ -4,8 +4,6 @@ import dev.oxoo2a.sim4da.Message;
 import dev.oxoo2a.sim4da.Network;
 import dev.oxoo2a.sim4da.Node;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.StringTokenizer;
 
 public class ControlVectorCoordinator extends Node {
@@ -27,11 +25,11 @@ public class ControlVectorCoordinator extends Node {
                 m=new Message();
                 String vectorString="";
                 // At the start of the control vector round trip, initialize all entries to 0
-                for (int i = 0; i < Main.n_nodes-1; i++) {
+                for (int i = 0; i < TerminationMain.n_nodes-1; i++) {
                     String subString = i+":"+0+";";
                     vectorString = vectorString+subString;
                 }
-                vectorString = vectorString + (Main.n_nodes-1)+ ":" + 0;
+                vectorString = vectorString + (TerminationMain.n_nodes-1)+ ":" + 0;
                 m.add("type" , "control_vector");
                 m.add("vector",  vectorString);
                 sendUnicast(0,m);
@@ -40,8 +38,8 @@ public class ControlVectorCoordinator extends Node {
             //wait for response
             Network.Message m_raw = receive();
             if(m_raw!=null){
-                System.out.println("Vector arrived back at COORDINATOR");
-                System.out.println(m_raw);
+
+
                 m = Message.fromJson(m_raw.payload);
                 String vectorString = m.query("vector");
                 StringTokenizer tokenizer = new StringTokenizer(vectorString, ";");

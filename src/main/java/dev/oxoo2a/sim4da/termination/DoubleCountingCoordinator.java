@@ -4,9 +4,6 @@ import dev.oxoo2a.sim4da.Message;
 import dev.oxoo2a.sim4da.Network;
 import dev.oxoo2a.sim4da.Node;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class DoubleCountingCoordinator extends Node {
 
     int messagesSent1 = 0;
@@ -27,7 +24,7 @@ public class DoubleCountingCoordinator extends Node {
 
         while(true){
             if(prompt){
-                for (int i = 0; i < Main.n_nodes; i++) {
+                for (int i = 0; i < TerminationMain.n_nodes; i++) {
                     m = new Message();
                     m.add("type", "double_counting");
                     sendUnicast(i,m);
@@ -40,8 +37,6 @@ public class DoubleCountingCoordinator extends Node {
                 System.out.println("Coordinator got null message");
             }else{
                 promptsReceived++;
-                System.out.println("Prompt response number " + promptsReceived);
-                System.out.println(m_raw.toString());
                 m = Message.fromJson(m_raw.payload);
                 String sent = m.query("sent");
                 String received = m.query("received");
@@ -54,7 +49,7 @@ public class DoubleCountingCoordinator extends Node {
                     messagesSent2 += Integer.parseInt(sent);
                     messagesReceived2 += Integer.parseInt(received);
                 }
-                if(promptsReceived == Main.n_nodes){
+                if(promptsReceived == TerminationMain.n_nodes){
                     promptsReceived = 0;
                     if(secondPrompt){
                         System.out.println("SECOND ROUND IS OVER: VALUES \n"

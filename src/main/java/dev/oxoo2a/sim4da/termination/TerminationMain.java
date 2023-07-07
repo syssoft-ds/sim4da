@@ -3,9 +3,9 @@ package dev.oxoo2a.sim4da.termination;
 import dev.oxoo2a.sim4da.Node;
 import dev.oxoo2a.sim4da.Simulator;
 
-public class Main {
-    static int n_nodes = 3;
-    static double probability =0.9;
+public class TerminationMain {
+    static int n_nodes = 150;
+    static double probability =0.999;
     static int double_count_coordinator_id = n_nodes;
     static int control_vector_coordinator_id = double_count_coordinator_id+1;
 
