@@ -4,8 +4,10 @@ public class Main {
 
     public static void main(String[] args) {
         int n_nodes = 5;
-        int duration = 16;
+        int duration = 26;
         Simulator s = Simulator.createDefaultSimulator(n_nodes);
+
+        int type = 1; // 0 = Counter Actor, 1 = Vector Actor
 
         for (int id=0; id<n_nodes; id++) {
             /*
@@ -13,14 +15,26 @@ public class Main {
             TokenRingNode n = new TokenRingNode(id, new LamportClock());
             */
 
-            if (id == 0) {
-                // u2  Double Count Actors that detects termination
-                DoubleCountActor first = new DoubleCountActor(id);
-                s.attachNode(id, first);
-            } else {
-                // u2 sending messages with Actors and detect termination
-                Actor n = new Actor(id);
-                s.attachNode(id, n);
+            if (type == 0) {
+                if (id == 0) {
+                    // u2  Double Count Actors that detects termination
+                    DoubleCountActor first = new DoubleCountActor(id);
+                    s.attachNode(id, first);
+                } else {
+                    // u2 sending messages with Actors and detect termination
+                    BaseActor n = new CountActor(id);
+                    s.attachNode(id, n);
+                }
+            }else{
+                if (id == 0) {
+                    // u2  Vector Controll Actor that detects termination
+                    VectorControlActor first = new VectorControlActor(id, n_nodes);
+                    s.attachNode(id, first);
+                } else {
+                    // u2 sending messages with Actors and detect termination
+                    VectorActor n = new VectorActor(id, n_nodes);
+                    s.attachNode(id, n);
+                }
             }
         }
         try {

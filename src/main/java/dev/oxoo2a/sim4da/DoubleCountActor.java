@@ -1,8 +1,6 @@
 package dev.oxoo2a.sim4da;
 
-import java.util.Random;
-
-public class DoubleCountActor extends Actor{
+public class DoubleCountActor extends CountActor {
 
     final int TERMINATION_CHECK_SEC = 3; // check termination every n seconds
     private long startTime;
@@ -39,7 +37,6 @@ public class DoubleCountActor extends Actor{
                         startTime = System.currentTimeMillis();
                         isFetchingControl = true;
                         allPassive = true;
-                        System.out.println("broadCast");
                         multiCast(control_cast);
                     }
                 }

@@ -2,7 +2,7 @@ package dev.oxoo2a.sim4da;
 
 import java.util.Random;
 
-public class Actor extends Node{
+public abstract class BaseActor extends Node{
 
     public boolean isActive() {
         return isActive;
@@ -13,26 +13,6 @@ public class Actor extends Node{
     }
 
     private boolean isActive = false;
-
-    public int getReceived() {
-        return received;
-    }
-
-    public void setReceived(int received) {
-        this.received = received;
-    }
-
-    private int received = 0;
-
-    public int getSent() {
-        return sent;
-    }
-
-    public void setSent(int sent) {
-        this.sent = sent;
-    }
-
-    private int sent = 0;
 
     public float getProbability() {
         return probability;
@@ -49,13 +29,13 @@ public class Actor extends Node{
     private float probability = 1.0f;
     final float convergence = 0.00005f;
 
-    public Actor(int my_id) {
+    public BaseActor(int my_id) {
         super(my_id, false);
     }
-    public Actor(int my_id, boolean trackClock) {
+    public BaseActor(int my_id, boolean trackClock) {
         super(my_id, trackClock);
     }
-    public Actor( int my_id, Clock clock ) { super(my_id, clock);}
+    public BaseActor(int my_id, Clock clock ) { super(my_id, clock);}
 
     @Override
     protected void main() {
@@ -67,7 +47,7 @@ public class Actor extends Node{
         Random r = new Random();
         float random = r.nextFloat();
 
-        // (myId == 0) makes sure the simulation runs and not all actors are inactive by chance
+        // (myId == 0) is reserved for the control actor and it will definitly will send a message to the network
         if (myId == 0 || random >= 0.7f)
             shouldSend(basic_cast);
 
@@ -79,26 +59,19 @@ public class Actor extends Node{
             Message m_json = Message.fromJson(m_raw.payload);
             boolean isControl = Boolean.parseBoolean(m_json.query("isControl"));
 
-            // sending
-            if (!isControl) {
-                received++;
-                isActive = true;
-                shouldSend(basic_cast);
+            // send basic
+            if (!isControl)
+                handleBasicMessage(basic_cast);
             // send control
-            }else{
+            else{
                 int controlID = Integer.parseInt(m_json.query("Sender"));
-                if (controlID == myId)
-                    continue;
-                control_cast.add("sent", sent);
-                control_cast.add("received", received);
-                control_cast.add("isActive", isActive ? "true" : "false");
-                sendUnicast(controlID, control_cast);
+                handleControlMessage(control_cast, controlID);
             }
         }
 
     }
 
-    private void shouldSend(Message u_cast){
+    protected void shouldSend(Message u_cast){
         Random r = new Random();
         float random = r.nextFloat();
         while (random <= probability ){
@@ -109,12 +82,13 @@ public class Actor extends Node{
         isActive = false;
     }
 
-    private void sendMessageToRandom(Message u_cast){
+    protected int sendMessageToRandom(Message u_cast){
         Random r = new Random();
         int random = r.nextInt(numberOfNodes()-1) +1 ;
-        sent++;
-
         sendUnicast(random, u_cast);
+        return random;
     }
 
+    protected abstract void handleControlMessage(Message control_cast, int controlID);
+    protected abstract void handleBasicMessage(Message basic_cast);
 }
