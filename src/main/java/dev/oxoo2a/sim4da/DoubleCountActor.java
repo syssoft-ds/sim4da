@@ -69,9 +69,6 @@ public class DoubleCountActor extends CountActor {
                     allPassive = false;
 
                 if (controlCount == numberOfNodes()-1){
-                    System.out.println(getReceived());
-                    System.out.println(getSent());
-
                     totalSent += getSent();
                     totalReceived += getReceived();
                     if (isActive())

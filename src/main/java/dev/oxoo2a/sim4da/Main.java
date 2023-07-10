@@ -7,7 +7,7 @@ public class Main {
         int duration = 26;
         Simulator s = Simulator.createDefaultSimulator(n_nodes);
 
-        int type = 1; // 0 = Counter Actor, 1 = Vector Actor
+        int type = 0; // 0 = Counter Actor, 1 = Vector Actor
 
         for (int id=0; id<n_nodes; id++) {
             /*

@@ -30,7 +30,6 @@ public class VectorActor extends BaseActor{
             return;
         control_cast.add("vector", vectorToString(vector));
         control_cast.add("isActive", isActive() ? "true" : "false");
-        System.out.println("send control to " + controlID);
         sendUnicast(controlID, control_cast);
     }
 

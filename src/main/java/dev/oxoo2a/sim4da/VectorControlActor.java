@@ -64,9 +64,6 @@ public class VectorControlActor extends VectorActor {
                 controlVector = vectorAdd(controlVector, vectorSent);
                 controlCount++;
 
-                System.out.println(controlCount);
-                System.out.println(vectorToString(controlVector));
-
                 if (isActive())
                     allPassive = false;
 

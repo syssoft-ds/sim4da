@@ -47,8 +47,8 @@ public abstract class BaseActor extends Node{
         Random r = new Random();
         float random = r.nextFloat();
 
-        // (myId == 0) is reserved for the control actor and it will definitly will send a message to the network
-        if (myId == 0 || random >= 0.7f)
+        // (myId == 0) is reserved for the control actor so (myId == 1) will definitly send a message to the network
+        if (myId == 1 || random >= 0.7f)
             shouldSend(basic_cast);
 
         while (stillSimulating()) {
