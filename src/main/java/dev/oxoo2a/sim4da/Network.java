@@ -26,11 +26,13 @@ public class Network {
             this.receiver_id = receiver_id;
             this.type = type;
             this.payload = payload;
+            isControl = false;
         }
         public int sender_id;
         public int receiver_id;
         public MessageType type;
         public String payload;
+        public boolean isControl;
 
         public String toString () {
             String r = "Network::Message(sender="+sender_id+",receiver="+receiver_id+",";

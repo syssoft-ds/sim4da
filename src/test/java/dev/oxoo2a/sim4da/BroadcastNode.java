@@ -5,7 +5,7 @@ import java.util.Random;
 public class BroadcastNode extends Node {
     // The superclass needs its ID
     public BroadcastNode ( int id ) {
-        super(id);
+        super(id, false);
     }
 
     public void main () {
