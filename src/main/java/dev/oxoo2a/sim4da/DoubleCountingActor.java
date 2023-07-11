@@ -40,6 +40,6 @@ public class DoubleCountingActor {
     }
 
     public boolean hasTerminated() {
-        return terminatedActors.size() == numActors;
+        return terminatedActors.size() == count;
     }
 }
